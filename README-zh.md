@@ -1,6 +1,6 @@
 # VibeCoding Next.js 脚手架
 
-这是一个专为 [VibeCoding](https://vibecoding.com) 打造的 [Next.js](https://nextjs.org) 项目脚手架，使用 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) 创建。
+这是一个专为 VibeCoding 打造的 [Next.js](https://nextjs.org) 项目脚手架，使用 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) 创建。
 
 > **English Version**: [README.md](./README.md)
 
@@ -221,12 +221,6 @@ bun dev
 部署 Next.js 应用程序最简单的方法是使用 Next.js 创建者提供的 [Vercel 平台](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)。
 
 查看我们的 [Next.js 部署文档](https://nextjs.org/docs/app/building-your-application/deploying) 了解更多详细信息。
-
-## VibeCoding 社区
-
-- 🌟 [VibeCoding 官网](https://vibecoding.com)
-- 💬 加入我们的开发者社区
-- 📚 查看更多脚手架和模板
 
 ---
 
