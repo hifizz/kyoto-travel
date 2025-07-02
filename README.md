@@ -25,6 +25,7 @@ This project uses a modern frontend technology stack:
 This project uses **Tailwind CSS v4**, a utility-first CSS framework that enables you to rapidly build modern user interfaces.
 
 ### Features
+
 - 🎨 Utility-first design philosophy
 - 📱 Responsive design support
 - 🌙 Dark mode support
@@ -32,10 +33,12 @@ This project uses **Tailwind CSS v4**, a utility-first CSS framework that enable
 - 🔧 Highly customizable
 
 ### Configuration Files
+
 - CSS variables definition: `app/globals.css`
 - PostCSS configuration: `postcss.config.mjs`
 
 ### Usage Examples
+
 ```tsx
 // Basic styling
 <div className="flex items-center justify-center min-h-screen bg-background">
@@ -53,6 +56,7 @@ This project uses **Tailwind CSS v4**, a utility-first CSS framework that enable
 shadcn/ui is a component library built on Radix UI and Tailwind CSS, providing beautiful, accessible, and customizable React components.
 
 ### Features
+
 - ✅ **Copy & Paste** - Copy component code into your project, full control
 - 🎯 **Accessibility** - Built on Radix UI, follows WAI-ARIA standards
 - 🎨 **Customizable** - Uses CSS variables, supports theme switching
@@ -60,6 +64,7 @@ shadcn/ui is a component library built on Radix UI and Tailwind CSS, providing b
 - 📦 **Tree-shakable** - Only use the components you need
 
 ### Current Configuration
+
 ```json
 {
   "style": "new-york",        // Using New York design style
@@ -70,15 +75,18 @@ shadcn/ui is a component library built on Radix UI and Tailwind CSS, providing b
 ```
 
 ### Pre-installed Components
+
 The project comes pre-installed with the following shadcn/ui components:
 
 **Layout Components**
+
 - `Card` - Card container
 - `Separator` - Divider line
 - `Sidebar` - Sidebar component
 - `Sheet` - Drawer component
 
 **Form Components**
+
 - `Button` - Button
 - `Input` - Input field
 - `Textarea` - Multi-line input
@@ -89,11 +97,13 @@ The project comes pre-installed with the following shadcn/ui components:
 - `Slider` - Slider
 
 **Navigation Components**
+
 - `Navigation Menu` - Navigation menu
 - `Breadcrumb` - Breadcrumb
 - `Pagination` - Pagination
 
 **Feedback Components**
+
 - `Alert` - Alert message
 - `Alert Dialog` - Alert dialog
 - `Dialog` - Dialog
@@ -103,6 +113,7 @@ The project comes pre-installed with the following shadcn/ui components:
 - `Progress` - Progress bar
 
 ### Adding New Components
+
 Use shadcn/ui CLI to add new components:
 
 ```bash
@@ -117,6 +128,7 @@ pnpm dlx shadcn@latest add
 ```
 
 ### Usage Example
+
 ```tsx
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -159,11 +171,13 @@ function ThemeToggle() {
 ## Development Guide
 
 ### Styling Best Practices
+
 1. **Prioritize Tailwind CSS classes** - Avoid custom CSS
 2. **Use CSS variables** - Convenient for theme switching and maintenance
 3. **Follow design system** - Use predefined spacing, colors, etc.
 
 ### Component Development Workflow
+
 1. Check [shadcn/ui component library](https://ui.shadcn.com/components)
 2. Use CLI to add needed components
 3. Customize component styles as needed
@@ -201,17 +215,20 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 ## Useful Resources
 
 ### Tailwind CSS
+
 - [Official Documentation](https://tailwindcss.com/docs)
 - [Tailwind UI](https://tailwindui.com) - Official component library
 - [Tailwind Play](https://play.tailwindcss.com) - Online playground
 
 ### shadcn/ui
+
 - [Official Documentation](https://ui.shadcn.com)
 - [Component Library](https://ui.shadcn.com/components)
 - [Theme Configuration](https://ui.shadcn.com/themes)
 - [CLI Documentation](https://ui.shadcn.com/cli)
 
 ### Design Resources
+
 - [Radix Colors](https://www.radix-ui.com/colors) - Color system
 - [Lucide Icons](https://lucide.dev) - Icon library
 - [Font: Geist](https://vercel.com/font) - Typography
