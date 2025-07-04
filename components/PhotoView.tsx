@@ -115,13 +115,13 @@ const PhotoView: React.FC<PhotoViewProps> = ({
     [currentIndex, totalCount]
   );
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
       onClose();
       setIsClosing(false);
     }, 600);
-  };
+  }, [onClose]);
 
   // 键盘导航
   React.useEffect(() => {
@@ -140,12 +140,20 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           event.preventDefault();
           handleNavigate("next");
           break;
+        case " ":
+          event.preventDefault();
+          if (event.shiftKey) {
+            handleNavigate("prev");
+          } else {
+            handleNavigate("next");
+          }
+          break;
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isActive, handleNavigate]);
+  }, [isActive, handleNavigate, handleClose]);
 
   const clipPathStyle: React.CSSProperties = {
     "--x": originRect ? `${originRect.left + originRect.width / 2}px` : "50%",
