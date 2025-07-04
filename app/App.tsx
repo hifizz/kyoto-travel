@@ -55,7 +55,7 @@ export default function App() {
   // );
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans antialiased">
+    <div className="min-h-screen bg-stone-100 font-sans antialiased dark:bg-black">
       <main className="max-w-7xl mx-auto">
         <Header />
         {/* <LayoutSwitcher /> */}

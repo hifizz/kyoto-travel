@@ -31,7 +31,7 @@ const GalleryMasonry: React.FC<GalleryMasonryProps> = ({ onPhotoSelect, photoDat
         {photoData.map((photo) => (
           <div
             key={photo.id}
-            className="rounded-lg overflow-hidden cursor-pointer group relative shadow-md hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-stone-200"
+            className="rounded-lg overflow-hidden cursor-pointer group relative shadow-md hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-stone-200 dark:bg-stone-900"
             onClick={(e) => {
               e.stopPropagation();
               onPhotoSelect(photo, e.currentTarget.getBoundingClientRect());

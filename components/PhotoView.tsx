@@ -153,7 +153,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   } as React.CSSProperties;
 
   const containerClasses = `
-    fixed inset-0 bg-stone-100 bg-opacity-95 backdrop-blur-sm z-50
+    fixed inset-0 bg-stone-100 bg-opacity-95 backdrop-blur-sm z-50 dark:bg-black/90
     transition-all duration-500 ease-in-out
     ${isActive && !isClosing ? "animate-clip-in" : "animate-clip-out"}
   `;
@@ -169,13 +169,13 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center p-4">
         {/* 加载指示器 */}
         {showLoadingIndicator && imageStatus === "loading" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-stone-100/80">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-600"></div>
+          <div className="absolute inset-0 flex items-center justify-center bg-stone-100/80 dark:bg-black/80">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-600 dark:border-stone-400"></div>
           </div>
         )}
 
         {/* 导航提示 */}
-        <div className="absolute top-6 left-6 text-stone-600 text-sm font-light">
+        <div className="absolute top-6 left-6 text-stone-600 text-sm font-light dark:text-stone-400">
           <span>
             {currentIndex + 1} / {totalCount}
           </span>
@@ -184,7 +184,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
         {/* 关闭按钮 */}
         <button
           onClick={handleClose}
-          className="absolute top-3 right-3 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center"
+          className="absolute top-3 right-3 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
           aria-label="Close photo view"
         >
           <X className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
@@ -200,7 +200,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 onClick={() => handleNavigate("prev")}
-                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center"
+                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Previous photo"
               >
                 <ArrowLeft className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
@@ -212,7 +212,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 onClick={() => handleNavigate("next")}
-                className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center"
+                className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Next photo"
               >
                 <ArrowRight className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
@@ -240,7 +240,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
               />
             </AnimatePresence>
             {imageStatus === "error" && (
-              <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50">
+              <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
                 <p className="text-red-500">图片加载失败</p>
               </div>
             )}
@@ -248,10 +248,10 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 
           {/* 文字信息容器 */}
           <div className="w-full text-center py-4 md:py-6 pb-0 md:pb-0 flex-shrink-0">
-            <h2 className="text-2xl lg:text-3xl font-thin tracking-widest text-stone-900 mb-2" data-title={displayedPhoto.title}>
+            <h2 className="text-2xl lg:text-3xl font-thin tracking-widest text-stone-900 mb-2 dark:text-stone-200" data-title={displayedPhoto.title}>
               {displayedPhoto.title}
             </h2>
-            <p className="text-sm lg:text-base font-light leading-relaxed text-stone-600 max-w-2xl mx-auto">
+            <p className="text-sm lg:text-base font-light leading-relaxed text-stone-600 max-w-2xl mx-auto dark:text-stone-400">
               {displayedPhoto.description}
             </p>
           </div>
