@@ -16,11 +16,10 @@ const Header: React.FC = () => (
       Kyoto in June
     </h1>
     <p className="mt-2 text-lg text-stone-500 dark:text-stone-400 font-light tracking-wider">
-      A Photographic Journey of Mossy Memoir
+      A Photographic Journey of Mossy
     </p>
     <div className="mt-2 text-xs text-stone-400 dark:text-stone-500">
       <p>共收录 {generatePhotoData().length} 张摄影作品</p>
-
     </div>
   </header>
 );
