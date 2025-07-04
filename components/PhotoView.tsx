@@ -78,9 +78,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
     };
   }, [displayedPhoto]);
 
-  // 处理导航按钮显隐的逻辑
-  const handleMouseMove = useCallback(() => {
-    setShowNavButtons(true);
+  const startHideTimer = useCallback(() => {
     if (navButtonTimerRef.current) {
       clearTimeout(navButtonTimerRef.current);
     }
@@ -88,6 +86,18 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       setShowNavButtons(false);
     }, 3000);
   }, []);
+
+  const cancelHideTimer = useCallback(() => {
+    if (navButtonTimerRef.current) {
+      clearTimeout(navButtonTimerRef.current);
+    }
+  }, []);
+
+  // 处理导航按钮显隐的逻辑
+  const handleMouseMove = useCallback(() => {
+    setShowNavButtons(true);
+    startHideTimer();
+  }, [startHideTimer]);
 
   // 组件挂载时，启动初始的隐藏定时器
   useEffect(() => {
@@ -208,6 +218,11 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 onClick={() => handleNavigate("prev")}
+                onMouseMove={(e) => {
+                  e.stopPropagation();
+                  cancelHideTimer();
+                }}
+                onMouseLeave={startHideTimer}
                 className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Previous photo"
               >
@@ -220,6 +235,11 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 onClick={() => handleNavigate("next")}
+                onMouseMove={(e) => {
+                  e.stopPropagation();
+                  cancelHideTimer();
+                }}
+                onMouseLeave={startHideTimer}
                 className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Next photo"
               >
