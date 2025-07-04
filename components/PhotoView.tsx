@@ -229,7 +229,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
               <motion.img
                 key={displayedPhoto.id}
                 ref={imageRef}
-                src={imageStatus === "loaded" ? displayedPhoto.src : ""}
+                src={imageStatus === "loaded" ? displayedPhoto.src : undefined}
                 alt={displayedPhoto.title}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
