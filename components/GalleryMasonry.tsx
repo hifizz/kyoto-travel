@@ -75,13 +75,6 @@ const GalleryMasonry: React.FC<GalleryMasonryProps> = ({ onPhotoSelect, photoDat
                 className="w-full h-auto object-cover"
                 sizes="(min-width: 1536px) 20vw, (min-width: 1280px) 25vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
               />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <span className="text-white text-xs md:text-sm font-thin tracking-wider drop-shadow-lg block">
-                    {photo.title}
-                  </span>
-                </div>
-              </div>
             </motion.div>
           ))}
         </div>
