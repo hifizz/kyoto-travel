@@ -13,7 +13,7 @@ const Header: React.FC = () => (
       <ThemeToggle />
     </div>
     <h1 className="text-4xl md:text-5xl font-thin tracking-widest uppercase">
-      Kyoto in June
+      Kyoto in June, 2025
     </h1>
     <p className="mt-2 text-lg text-stone-500 dark:text-stone-400 font-light tracking-wider">
       A Photographic Journey of Mossy

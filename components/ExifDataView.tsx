@@ -20,7 +20,7 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
       setIsLoadingExif(true);
       let isMounted = true;
 
-      readExifData(photo.src).then(data => {
+      readExifData(photo.original).then(data => {
         if (isMounted) {
           setExifData(data);
           setIsLoadingExif(false);
@@ -134,7 +134,7 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
                 <div className="flex justify-between items-center py-1">
                   <span className="text-stone-500 dark:text-stone-400">文件名</span>
                   <span className="font-medium text-stone-700 dark:text-stone-300">
-                    {photo?.src.split('/').pop()}
+                    {photo?.original.split('/').pop()}
                   </span>
                 </div>
               </div>

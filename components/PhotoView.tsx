@@ -66,7 +66,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
       setShowLoadingIndicator(false); // 也可能需要显示错误状态
     };
-    img.src = displayedPhoto.src;
+    img.src = displayedPhoto.original;
 
     // 清理函数
     return () => {
@@ -257,7 +257,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
               <motion.img
                 key={displayedPhoto.id}
                 ref={imageRef}
-                src={imageStatus === "loaded" ? displayedPhoto.src : undefined}
+                src={imageStatus === "loaded" ? displayedPhoto.original : undefined}
                 alt={displayedPhoto.title}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

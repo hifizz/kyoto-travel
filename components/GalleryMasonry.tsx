@@ -1,58 +1,91 @@
 'use client';
 
-import React from 'react';
-import Masonry from 'react-masonry-css';
+import React, { useMemo } from 'react';
+import { motion, Variants } from 'framer-motion';
+import Image from 'next/image';
 import type { PhotoData } from '../types';
+import useBreakpoint from '@/hooks/use-breakpoint';
 
 interface GalleryMasonryProps {
   onPhotoSelect: (photo: PhotoData, rect: DOMRect) => void;
   photoData: PhotoData[];
 }
 
-const breakpointColumnsObj = {
-  default: 4,
-  1280: 4,
-  1024: 3,
-  768: 2,
-  640: 1
+const breakpointConfig = {
+  '640': 1, // sm
+  '768': 2, // md
+  '1024': 3, // lg
+  '1280': 3, // xl
+  '1536': 3  // 2xl
 };
 
 /**
- * @description 图片画廊组件 - 瀑布流布局 (使用 react-masonry-css)
+ * @description 图片画廊组件 - 瀑布流布局 (JS 分组, 从左到右排序)
  */
 const GalleryMasonry: React.FC<GalleryMasonryProps> = ({ onPhotoSelect, photoData }) => {
+  const columns = useBreakpoint(breakpointConfig, 1);
+
+  const photoColumns = useMemo(() => {
+    const newColumns: PhotoData[][] = Array.from({ length: columns }, () => []);
+    photoData.forEach((photo, index) => {
+      newColumns[index % columns].push(photo);
+    });
+    return newColumns;
+  }, [photoData, columns]);
+
+  const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 10,
+      },
+    },
+  };
+
   return (
-    <div className="p-4 md:p-8">
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
-      >
-        {photoData.map((photo) => (
-          <div
-            key={photo.id}
-            className="rounded-lg overflow-hidden cursor-pointer group relative shadow-md hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-stone-200 dark:bg-stone-900"
-            onClick={(e) => {
-              e.stopPropagation();
-              onPhotoSelect(photo, e.currentTarget.getBoundingClientRect());
-            }}
-          >
-            <img
-              src={photo.thumbnail}
-              alt={photo.title}
-              className="w-full h-auto object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-              <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                <span className="text-white text-xs md:text-sm font-thin tracking-wider drop-shadow-lg block">
-                  {photo.title}
-                </span>
+    <div className="p-4 md:p-8 flex gap-4">
+      {photoColumns.map((column, colIndex) => (
+        <div key={colIndex} className="flex flex-col gap-4 w-full">
+          {column.map((photo) => (
+            <motion.div
+              key={photo.id}
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              whileHover={{ scale: 1.03, y: -5 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+              className="rounded-lg overflow-hidden cursor-pointer group relative shadow-md hover:shadow-2xl transition-shadow duration-300 bg-stone-200 dark:bg-stone-900"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPhotoSelect(photo, e.currentTarget.getBoundingClientRect());
+              }}
+            >
+              <Image
+                src={photo.thumbnail}
+                alt={photo.title}
+                width={photo.width}
+                height={photo.height}
+                placeholder="blur"
+                blurDataURL={photo.blurDataURL}
+                className="w-full h-auto object-cover"
+                sizes="(min-width: 1536px) 20vw, (min-width: 1280px) 25vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
+                <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
+                  <span className="text-white text-xs md:text-sm font-thin tracking-wider drop-shadow-lg block">
+                    {photo.title}
+                  </span>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </Masonry>
+            </motion.div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 };

@@ -101,12 +101,14 @@ export const generatePhotoData = (): PhotoData[] => {
     ];
 
     photos.push({
-      id: i,
+      id: String(i),
       title: titles[i % titles.length],
       description: descriptions[i % descriptions.length],
-      src: `/images/${filename}`,
       thumbnail: `/images/${filename}`,
-      // EXIF数据将异步加载
+      original: `/images/${filename}`,
+      width: 0, // Placeholder, to be filled by metadata script
+      height: 0, // Placeholder, to be filled by metadata script
+      blurDataURL: '', // Placeholder, to be filled by metadata script
     });
   }
 

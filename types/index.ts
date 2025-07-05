@@ -1,10 +1,14 @@
 // --- TYPES ---
 export interface PhotoData {
-  id: number;
+  id: string;
   title: string;
   description: string;
-  src: string;
   thumbnail: string;
+  original: string;
+  width: number;
+  height: number;
+  blurDataURL?: string;
+  exif?: Record<string, any>;
   // 真实的EXIF数据（可选，异步加载）
   exifData?: {
     camera?: string;
