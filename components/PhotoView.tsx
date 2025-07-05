@@ -130,6 +130,9 @@ const PhotoView: React.FC<PhotoViewProps> = ({
     setTimeout(() => {
       onClose();
       setIsClosing(false);
+      // 关闭后重置状态
+      setCurrentIndex(-1);
+      setImageStatus('loading');
     }, 600);
   }, [onClose]);
 
