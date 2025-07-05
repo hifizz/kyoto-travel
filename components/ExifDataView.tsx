@@ -138,9 +138,6 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
                   </span>
                 </div>
               </div>
-              <div className="pt-2 text-xs text-stone-400 border-t border-stone-200 dark:text-stone-500 dark:border-stone-700">
-                <p>使用 ← → 方向键切换图片 | ESC 键退出</p>
-              </div>
             </div>
           </motion.div>
         )}
