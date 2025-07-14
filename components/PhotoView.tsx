@@ -1,11 +1,12 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowLeft, ArrowRight } from "lucide-react";
-import type { PhotoViewProps } from "../types";
-import ExifDataView from "./ExifDataView";
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import type { PhotoViewProps, PhotoData } from '../types';
+import { readExifData } from '../utils/photoUtils';
 import { STROKE_WIDTH } from '../constants';
+import ExifInfoPreview from './ExifInfoPreview';
 
-type ImageStatus = "loading" | "loaded" | "error";
+type ImageStatus = 'loading' | 'loaded' | 'error';
 
 /**
  * @description 单张图片详情视图
@@ -18,9 +19,11 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   originRect,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [imageStatus, setImageStatus] = useState<ImageStatus>("loading");
+  const [imageStatus, setImageStatus] = useState<ImageStatus>('loading');
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const [exifData, setExifData] = useState<PhotoData['exifData']>(undefined);
+  const [isLoadingExif, setIsLoadingExif] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const loadingTimerRef = useRef<number | null>(null);
   const navButtonTimerRef = useRef<number | null>(null);
@@ -38,11 +41,40 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const displayedPhoto = currentIndex > -1 ? photoData[currentIndex] : null;
   const totalCount = photoData.length;
 
+  // 加载EXIF数据
+  useEffect(() => {
+    if (displayedPhoto) {
+      setIsLoadingExif(true);
+      let isMounted = true;
+
+      readExifData(displayedPhoto.original)
+        .then((data) => {
+          if (isMounted) {
+            setExifData(data);
+            setIsLoadingExif(false);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to read EXIF data:', error);
+          if (isMounted) {
+            setIsLoadingExif(false);
+            setExifData({});
+          }
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    } else {
+      setExifData(undefined);
+    }
+  }, [displayedPhoto]);
+
   // 核心图片加载逻辑
   useEffect(() => {
     if (!displayedPhoto) return;
 
-    setImageStatus("loading");
+    setImageStatus('loading');
     setShowLoadingIndicator(false); // 每次都重置
 
     // 清除上一个定时器
@@ -57,12 +89,12 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 
     const img = new Image();
     img.onload = () => {
-      setImageStatus("loaded");
+      setImageStatus('loaded');
       if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
       setShowLoadingIndicator(false);
     };
     img.onerror = () => {
-      setImageStatus("error");
+      setImageStatus('error');
       if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
       setShowLoadingIndicator(false); // 也可能需要显示错误状态
     };
@@ -110,11 +142,11 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   }, [handleMouseMove]);
 
   const handleNavigate = useCallback(
-    (direction: "prev" | "next") => {
+    (direction: 'prev' | 'next') => {
       if (currentIndex === -1) return;
 
       let newIndex;
-      if (direction === "prev") {
+      if (direction === 'prev') {
         newIndex = (currentIndex - 1 + totalCount) % totalCount;
       } else {
         newIndex = (currentIndex + 1) % totalCount;
@@ -142,41 +174,41 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       if (!isActive) return;
 
       switch (event.key) {
-        case "Escape":
+        case 'Escape':
           handleClose();
           break;
-        case "ArrowLeft":
+        case 'ArrowLeft':
           event.preventDefault();
-          handleNavigate("prev");
+          handleNavigate('prev');
           break;
-        case "ArrowRight":
+        case 'ArrowRight':
           event.preventDefault();
-          handleNavigate("next");
+          handleNavigate('next');
           break;
-        case " ":
+        case ' ':
           event.preventDefault();
           if (event.shiftKey) {
-            handleNavigate("prev");
+            handleNavigate('prev');
           } else {
-            handleNavigate("next");
+            handleNavigate('next');
           }
           break;
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isActive, handleNavigate, handleClose]);
 
   const clipPathStyle: React.CSSProperties = {
-    "--x": originRect ? `${originRect.left + originRect.width / 2}px` : "50%",
-    "--y": originRect ? `${originRect.top + originRect.height / 2}px` : "50%",
+    '--x': originRect ? `${originRect.left + originRect.width / 2}px` : '50%',
+    '--y': originRect ? `${originRect.top + originRect.height / 2}px` : '50%',
   } as React.CSSProperties;
 
   const containerClasses = `
     fixed inset-0 bg-stone-100 bg-opacity-95 backdrop-blur-sm z-50 dark:bg-black/90
     transition-all duration-500 ease-in-out
-    ${isActive && !isClosing ? "animate-clip-in" : "animate-clip-out"}
+    ${isActive && !isClosing ? 'animate-clip-in' : 'animate-clip-out'}
   `;
 
   if (!displayedPhoto) return null;
@@ -187,16 +219,16 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       className={containerClasses}
       onMouseMove={handleMouseMove}
     >
-      <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center p-4">
+      <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center">
         {/* 加载指示器 */}
-        {showLoadingIndicator && imageStatus === "loading" && (
+        {showLoadingIndicator && imageStatus === 'loading' && (
           <div className="absolute inset-0 flex items-center justify-center bg-stone-100/80 dark:bg-black/80">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-600 dark:border-stone-400"></div>
           </div>
         )}
 
         {/* 导航提示 - 移动到右下角，在 ExifDataView 左边 */}
-        <div className="absolute bottom-6 right-24 text-stone-600 text-sm font-light dark:text-stone-400 ml-3">
+        <div className="absolute bottom-6 left-6 text-stone-600 text-sm font-light dark:text-stone-400">
           <span>
             {currentIndex + 1} / {totalCount}
           </span>
@@ -220,7 +252,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                onClick={() => handleNavigate("prev")}
+                onClick={() => handleNavigate('prev')}
                 onMouseMove={(e) => {
                   e.stopPropagation();
                   cancelHideTimer();
@@ -237,7 +269,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                onClick={() => handleNavigate("next")}
+                onClick={() => handleNavigate('next')}
                 onMouseMove={(e) => {
                   e.stopPropagation();
                   cancelHideTimer();
@@ -252,26 +284,40 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           )}
         </AnimatePresence>
 
-        {/* 主内容区: 图片和描述 - 重新设计布局 */}
-        <div className="w-full h-full flex flex-col items-center justify-center">
-          {/* 图片容器 - calc(100vh - 40px) 高度，固定尺寸避免抖动 */}
-          <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100vh - 40px)' }}>
+        {/* 主内容区: 左右分栏布局 */}
+        <div className="w-full h-full flex">
+          {/* 左侧图片区域 */}
+          <div className="flex-1 relative flex items-center justify-center bg-stone-50 dark:bg-stone-950 p-2">
             <div className="relative w-full h-full flex items-center justify-center">
               <AnimatePresence initial={false}>
                 <motion.img
                   key={displayedPhoto.id}
                   ref={imageRef}
-                  src={imageStatus === "loaded" ? displayedPhoto.original : undefined}
+                  src={
+                    imageStatus === 'loaded'
+                      ? displayedPhoto.original
+                      : undefined
+                  }
                   alt={displayedPhoto.title}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  transition={{ duration: 0.5, ease: 'easeInOut' }}
                   className="absolute max-w-full max-h-full object-contain shadow-2xl"
-                  style={{ opacity: imageStatus === "loaded" ? 1 : 0 }}
+                  style={{
+                    opacity: imageStatus === 'loaded' ? 1 : 0,
+                    maxWidth:
+                      displayedPhoto.width > displayedPhoto.height
+                        ? '100%'
+                        : 'auto',
+                    maxHeight:
+                      displayedPhoto.height >= displayedPhoto.width
+                        ? '100%'
+                        : 'auto',
+                  }}
                 />
               </AnimatePresence>
-              {imageStatus === "error" && (
+              {imageStatus === 'error' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
                   <p className="text-red-500">图片加载失败</p>
                 </div>
@@ -279,16 +325,25 @@ const PhotoView: React.FC<PhotoViewProps> = ({
             </div>
           </div>
 
-          {/* 描述信息容器 - 固定 40px 高度 */}
-          <div className="w-full text-left flex items-end justify-center h-10 px-4">
-            <p className="text-sm lg:text-base font-light leading-relaxed text-stone-600 max-w-2xl dark:text-stone-400">
-              {displayedPhoto.description}
-            </p>
+          {/* 右侧文字面板 */}
+          <div className="w-full max-w-[280px]">
+            <div className="h-full flex flex-col py-5 px-5">
+              {/* 标题和描述 */}
+              <div className="flex-1 flex flex-col justify-between pb-0 pt-20">
+                <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-8">
+                  {displayedPhoto.description}
+                </p>
+
+                {/* EXIF 信息预览 */}
+                <ExifInfoPreview
+                  exifData={exifData}
+                  isLoadingExif={isLoadingExif}
+                  authorName="zilin"
+                />
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* EXIF 数据视图，绝对定位于右下角 */}
-        <ExifDataView photo={displayedPhoto} />
       </div>
     </div>
   );
