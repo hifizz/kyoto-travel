@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import type { PhotoViewProps, PhotoData } from '../types';
-import { readExifData } from '../utils/photoUtils';
 import { STROKE_WIDTH } from '../constants';
 import ExifInfoPreview from './ExifInfoPreview';
 
@@ -22,8 +21,6 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const [imageStatus, setImageStatus] = useState<ImageStatus>('loading');
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
   const [showNavButtons, setShowNavButtons] = useState(true);
-  const [exifData, setExifData] = useState<PhotoData['exifData']>(undefined);
-  const [isLoadingExif, setIsLoadingExif] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const loadingTimerRef = useRef<number | null>(null);
   const navButtonTimerRef = useRef<number | null>(null);
@@ -41,34 +38,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const displayedPhoto = currentIndex > -1 ? photoData[currentIndex] : null;
   const totalCount = photoData.length;
 
-  // 加载EXIF数据
-  useEffect(() => {
-    if (displayedPhoto) {
-      setIsLoadingExif(true);
-      let isMounted = true;
 
-      readExifData(displayedPhoto.original)
-        .then((data) => {
-          if (isMounted) {
-            setExifData(data);
-            setIsLoadingExif(false);
-          }
-        })
-        .catch((error) => {
-          console.error('Failed to read EXIF data:', error);
-          if (isMounted) {
-            setIsLoadingExif(false);
-            setExifData({});
-          }
-        });
-
-      return () => {
-        isMounted = false;
-      };
-    } else {
-      setExifData(undefined);
-    }
-  }, [displayedPhoto]);
 
   // 核心图片加载逻辑
   useEffect(() => {
@@ -336,8 +306,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 
                 {/* EXIF 信息预览 */}
                 <ExifInfoPreview
-                  exifData={exifData}
-                  isLoadingExif={isLoadingExif}
+                  photo={displayedPhoto}
                   authorName="zilin"
                 />
               </div>

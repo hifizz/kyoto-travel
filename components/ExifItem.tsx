@@ -3,8 +3,6 @@ import React from 'react';
 interface ExifItemProps {
   label: string;
   value?: string | number;
-  isLoading?: boolean;
-  loadingText?: string;
   renderValue?: () => React.ReactNode;
   className?: string;
 }
@@ -22,8 +20,6 @@ interface ExifItemProps {
 const ExifItem: React.FC<ExifItemProps> = ({
   label,
   value,
-  isLoading = false,
-  loadingText = '读取中...',
   renderValue,
   className = '',
 }) => {
@@ -32,17 +28,9 @@ const ExifItem: React.FC<ExifItemProps> = ({
       return renderValue();
     }
 
-    if (isLoading) {
-      return (
-        <span className="font-medium text-stone-700 dark:text-stone-300">
-          {loadingText}
-        </span>
-      );
-    }
-
     return (
-      <span className="text-stone-700 dark:text-stone-300">
-        {value}
+      <span className="text-stone-600 dark:text-stone-300">
+        {value || '—'}
       </span>
     );
   };
