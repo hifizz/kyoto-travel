@@ -5,21 +5,12 @@ import path from 'path';
 import type { PhotoData } from '@/types';
 
 export default async function Home() {
-  const basePhotoData = generatePhotoData();
   const metadataPath = path.join(process.cwd(), 'data/photo-metadata.json');
   const metadataFile = await fs.readFile(metadataPath, 'utf8');
   const metadata = JSON.parse(metadataFile);
 
-  const photoData: PhotoData[] = basePhotoData.map((photo) => {
-    const photoFilename = photo.original.split('/').pop();
-    if (photoFilename && metadata[photoFilename]) {
-      return {
-        ...photo,
-        ...metadata[photoFilename]
-      };
-    }
-    return photo;
-  });
+  // 直接基于元数据生成照片数据
+  const photoData: PhotoData[] = generatePhotoData(metadata);
 
   return <App photoData={photoData} />;
 }

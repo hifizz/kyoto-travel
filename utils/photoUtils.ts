@@ -67,50 +67,32 @@ export const readExifData = async (imageSrc: string): Promise<PhotoData['exifDat
   }
 };
 
-// 生成图片数据的函数
-export const generatePhotoData = (): PhotoData[] => {
+// 基于元数据文件生成图片数据的函数
+export const generatePhotoData = (metadata?: Record<string, any>): PhotoData[] => {
+  if (!metadata) {
+    return [];
+  }
+
   const photos: PhotoData[] = [];
 
-  // 从 _DSC1166 到 _DSC1402 的所有图片
-  for (let i = 1166; i <= 1402; i++) {
-    // 跳过一些不存在的编号（根据实际文件列表）
-    if (i === 1182 || i === 1183 || i === 1184 || i === 1185 || i === 1186 ||
-        i === 1187 || i === 1188 || i === 1189 || i === 1190 || i === 1265) {
-      continue;
-    }
-
-    const filename = `_DSC${i}.JPG`;
-    const titles = [
-      "光影流转", "深林小径", "静谧时光", "自然纹理", "晨光微露", "细节之美",
-      "森林深处", "绿意盎然", "阳光斑驳", "树影婆娑", "微风轻拂", "生机勃勃",
-      "宁静致远", "自然之美", "光影交错", "绿叶如茵", "清晨时光", "自然韵律",
-      "光线柔和", "自然色彩", "树木参天", "绿色世界", "光影变幻", "自然景观"
-    ];
-
-    const descriptions = [
-      "阳光透过树叶的缝隙，在地面上投下斑驳的影子。",
-      "蜿蜒的小径通向森林深处，两旁绿意盎然。",
-      "在这个安静的角落，时间仿佛停止了流动。",
-      "大自然的纹理和色彩，展现着生命的美好。",
-      "清晨的第一缕阳光，轻柔地洒在每一个角落。",
-      "在微小的细节中，发现生活的美好瞬间。",
-      "森林中的静谧与美好，让人心旷神怡。",
-      "绿色的世界里，每一片叶子都在诉说着生命的故事。",
-      "光影的交错，构成了大自然最美的画卷。",
-      "在这片绿意中，感受着生命的力量和美好。"
-    ];
+  // 从元数据文件中获取所有图片
+  for (const [filename, data] of Object.entries(metadata)) {
+    const id = filename.replace(/\.(jpg|jpeg|png|webp)$/i, '');
 
     photos.push({
-      id: String(i),
-      title: titles[i % titles.length],
-      description: descriptions[i % descriptions.length],
-      thumbnail: `/images/${filename}`,
-      original: `/images/${filename}`,
-      width: 0, // Placeholder, to be filled by metadata script
-      height: 0, // Placeholder, to be filled by metadata script
-      blurDataURL: '', // Placeholder, to be filled by metadata script
+      id,
+      title: data.title || filename.replace(/\.[^/.]+$/, ""),
+      description: data.description || "美丽的京都风景",
+      thumbnail: data.thumbnail || `/images/${filename}`,
+      original: data.original || `/images/${filename}`,
+      width: data.width || 0,
+      height: data.height || 0,
+      blurDataURL: data.blurDataURL || '',
     });
   }
+
+  // 按文件名排序
+  photos.sort((a, b) => a.id.localeCompare(b.id));
 
   return photos;
 };

@@ -1,76 +1,171 @@
-import fs from 'fs/promises';
+import { promises as fs } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const imagesDir = path.join(process.cwd(), 'public/images');
-const metadataPath = path.join(process.cwd(), 'data/photo-metadata.json');
-
-async function generateMetadata() {
+// 直接在脚本中实现 blurhash 生成
+async function generateBlurHash(imagePath) {
   try {
-    console.log('Starting metadata generation...');
+    // 创建小尺寸图片用于生成 blurhash
+    const buffer = await sharp(imagePath)
+      .resize(10, 7, { fit: 'inside' })
+      .jpeg({ quality: 20 })
+      .toBuffer();
 
-    const imageFiles = await fs.readdir(imagesDir);
-    console.log(`Found ${imageFiles.length} images in ${imagesDir}`);
-
-    let metadata = {};
-    try {
-      const existingData = await fs.readFile(metadataPath, 'utf-8');
-      metadata = JSON.parse(existingData);
-      console.log('Successfully read existing metadata.');
-    } catch (error) {
-      console.warn('Could not read existing metadata file. A new one will be created.');
-    }
-
-    let updatedCount = 0;
-    for (const file of imageFiles) {
-      if (!/\.jpe?g|png|webp|tiff$/i.test(file)) {
-        console.log(`Skipping non-image file: ${file}`);
-        continue;
-      }
-
-      if (metadata[file] && metadata[file].width && metadata[file].height && metadata[file].blurDataURL) {
-        // console.log(`Skipping ${file}, metadata already exists.`);
-        continue;
-      }
-
-      try {
-        const imagePath = path.join(imagesDir, file);
-        const image = sharp(imagePath);
-        const { width, height } = await image.metadata();
-
-        // Generate a low-quality placeholder
-        const placeholderBuffer = await image.resize(10).jpeg({ quality: 50 }).toBuffer();
-        const blurDataURL = `data:image/jpeg;base64,${placeholderBuffer.toString('base64')}`;
-
-        if (!metadata[file]) {
-          metadata[file] = {};
-        }
-
-        metadata[file] = {
-          ...metadata[file],
-          width,
-          height,
-          blurDataURL,
-        };
-        
-        updatedCount++;
-        console.log(`Processed ${file}: width=${width}, height=${height}`);
-      } catch (err) {
-        console.error(`Error processing ${file}:`, err);
-      }
-    }
-
-    if (updatedCount > 0) {
-        await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-        console.log(`Successfully updated metadata for ${updatedCount} images and saved to ${metadataPath}`);
-    } else {
-        console.log('No new images to process. Metadata file is up to date.');
-    }
-
-
+    return `data:image/jpeg;base64,${buffer.toString('base64')}`;
   } catch (error) {
-    console.error('An error occurred during metadata generation:', error);
+    console.warn(`⚠️ 无法为 ${imagePath} 生成 blur hash:`, error.message);
+    return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   }
 }
 
-generateMetadata(); 
+// 获取图片尺寸
+async function getImageDimensions(imagePath) {
+  try {
+    const metadata = await sharp(imagePath).metadata();
+    return {
+      width: metadata.width || 800,
+      height: metadata.height || 600
+    };
+  } catch (error) {
+    console.warn(`⚠️ 无法获取 ${imagePath} 的尺寸:`, error.message);
+    return { width: 800, height: 600 };
+  }
+}
+
+// 开发环境缓存管理
+class DevCache {
+  constructor() {
+    this.memoryCache = new Map();
+    this.cacheDir = '.dev-cache';
+  }
+
+  async ensureCacheDir() {
+    try {
+      await fs.mkdir(this.cacheDir, { recursive: true });
+    } catch (error) {
+      // 目录已存在，忽略错误
+    }
+  }
+
+  async get(key) {
+    // 先检查内存缓存
+    if (this.memoryCache.has(key)) {
+      return this.memoryCache.get(key);
+    }
+
+    // 检查文件缓存
+    try {
+      await this.ensureCacheDir();
+      const filePath = path.join(this.cacheDir, `${key}.json`);
+      const data = await fs.readFile(filePath, 'utf-8');
+      const parsed = JSON.parse(data);
+      this.memoryCache.set(key, parsed);
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async set(key, value) {
+    // 设置内存缓存
+    this.memoryCache.set(key, value);
+
+    // 设置文件缓存
+    try {
+      await this.ensureCacheDir();
+      const filePath = path.join(this.cacheDir, `${key}.json`);
+      await fs.writeFile(filePath, JSON.stringify(value, null, 2));
+    } catch (error) {
+      console.warn(`⚠️ 无法写入缓存文件: ${error.message}`);
+    }
+  }
+}
+
+async function processImage(imagePath, cache) {
+  const filename = path.basename(imagePath);
+  const cacheKey = `img_${filename}_${(await fs.stat(imagePath)).mtime.getTime()}`;
+
+  // 检查缓存
+  const cached = await cache.get(cacheKey);
+  if (cached) {
+    console.log(`📦 使用缓存: ${filename}`);
+    return cached;
+  }
+
+  console.log(`🔄 处理图片: ${filename}`);
+
+  const [dimensions, blurDataURL] = await Promise.all([
+    getImageDimensions(imagePath),
+    generateBlurHash(imagePath)
+  ]);
+
+  const result = {
+    ...dimensions,
+    blurDataURL,
+    thumbnail: `/images/${filename}`,
+    original: `/images/${filename}`
+  };
+
+  // 缓存结果
+  await cache.set(cacheKey, result);
+
+  return result;
+}
+
+async function loadContentConfig() {
+  try {
+    const configPath = 'data/content-config.json';
+    const content = await fs.readFile(configPath, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    console.warn('⚠️ 无法加载内容配置，将使用默认值');
+    return {};
+  }
+}
+
+async function generateMetadata() {
+  console.log('🚀 开始生成照片元数据...');
+
+  const cache = new DevCache();
+  const contentConfig = await loadContentConfig();
+
+  const imagesDir = 'public/images';
+  const outputPath = 'data/photo-metadata.json';
+
+  try {
+    const files = await fs.readdir(imagesDir);
+    const imageFiles = files.filter(file =>
+      /\.(jpg|jpeg|png|webp)$/i.test(file)
+    );
+
+    console.log(`📸 找到 ${imageFiles.length} 张图片`);
+
+    const metadata = {};
+
+    for (const filename of imageFiles) {
+      const imagePath = path.join(imagesDir, filename);
+      const imageData = await processImage(imagePath, cache);
+
+      // 合并内容配置
+      const content = contentConfig[filename] || {
+        title: filename.replace(/\.[^/.]+$/, ""),
+        description: "美丽的京都风景"
+      };
+
+      metadata[filename] = {
+        ...content,
+        ...imageData
+      };
+    }
+
+    await fs.writeFile(outputPath, JSON.stringify(metadata, null, 2));
+    console.log(`✅ 元数据已生成: ${outputPath}`);
+    console.log(`📊 处理了 ${Object.keys(metadata).length} 张图片`);
+
+  } catch (error) {
+    console.error('❌ 生成元数据失败:', error);
+    process.exit(1);
+  }
+}
+
+generateMetadata();

@@ -3,13 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "NODE_ENV=development next dev --turbopack",
+    "dev:setup": "NODE_ENV=development node scripts/generate-photo-metadata.mjs && pnpm dev",
+    "build": "NODE_ENV=production node scripts/build-metadata.mjs && next build",
+    "build:local": "NODE_ENV=production next build",
+    "build:force-r2": "NODE_ENV=production CI=true node scripts/build-metadata.mjs && next build",
+    "start": "NODE_ENV=production next start",
+    "start:local": "NODE_ENV=production NEXT_PUBLIC_ASSET_PREFIX= next start",
     "lint": "next lint",
-    "gen:metadata": "node scripts/generate-photo-metadata.mjs"
+    "gen:metadata": "NODE_ENV=development node scripts/generate-photo-metadata.mjs",
+    "gen:metadata:prod": "NODE_ENV=production node scripts/build-metadata.mjs",
+    "test:metadata": "NODE_ENV=development node scripts/test-metadata.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.844.0",
+    "@aws-sdk/lib-storage": "^3.844.0",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -41,6 +49,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.0",
     "embla-carousel-react": "^8.6.0",
     "exifr": "^7.1.3",
     "framer-motion": "^12.23.0",
