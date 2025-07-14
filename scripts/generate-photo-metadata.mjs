@@ -148,8 +148,7 @@ async function generateMetadata() {
 
       // 合并内容配置
       const content = contentConfig[filename] || {
-        title: filename.replace(/\.[^/.]+$/, ""),
-        description: "美丽的京都风景"
+        description: ""
       };
 
       metadata[filename] = {

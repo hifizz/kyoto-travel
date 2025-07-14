@@ -38,8 +38,6 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const displayedPhoto = currentIndex > -1 ? photoData[currentIndex] : null;
   const totalCount = photoData.length;
 
-
-
   // 核心图片加载逻辑
   useEffect(() => {
     if (!displayedPhoto) return;
@@ -300,15 +298,13 @@ const PhotoView: React.FC<PhotoViewProps> = ({
             <div className="h-full flex flex-col py-5 px-5">
               {/* 标题和描述 */}
               <div className="flex-1 flex flex-col justify-between pb-0 pt-20">
-                <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-8">
-                  {displayedPhoto.description}
-                </p>
+                <div className="flex flex-col gap-2 text-base md:text-lg lg:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400">
+                  <p className="">{displayedPhoto.location}</p>
+                  <p className="">{displayedPhoto.description}</p>
+                </div>
 
                 {/* EXIF 信息预览 */}
-                <ExifInfoPreview
-                  photo={displayedPhoto}
-                  authorName="zilin"
-                />
+                <ExifInfoPreview photo={displayedPhoto} authorName="zilin" />
               </div>
             </div>
           </div>

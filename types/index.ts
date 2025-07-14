@@ -3,6 +3,7 @@ export interface PhotoData {
   id: string;
   title: string;
   description: string;
+  location?: string;
   thumbnail: string;
   original: string;
   width: number;
@@ -21,6 +22,19 @@ export interface PhotoData {
     rating?: number; // 照片评分（1-5星）
     rawExif?: Record<string, unknown>;
   };
+}
+
+// 内容配置接口（用于content-config.json）
+export interface PhotoContentConfig {
+  description: string;
+  location?: string;
+}
+
+// 图片管理界面需要的接口
+export interface PhotoManagementItem {
+  filename: string;
+  configured: boolean;
+  config?: PhotoContentConfig;
 }
 
 export interface GalleryProps {

@@ -87,8 +87,9 @@ export const generatePhotoData = (metadata?: Record<string, any>): PhotoData[] =
 
     photos.push({
       id,
-      title: data.title || filename.replace(/\.[^/.]+$/, ""),
-      description: data.description || "美丽的京都风景",
+      title: filename.replace(/\.[^/.]+$/, ""), // 直接使用文件名作为标题
+      description: data.description || "",
+      location: data.location || undefined, // 添加地点字段支持
       thumbnail: data.thumbnail || `/images/${filename}`,
       original: data.original || `/images/${filename}`,
       width: data.width || 0,
