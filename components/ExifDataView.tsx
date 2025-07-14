@@ -96,15 +96,25 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
+      {/* 星星评分显示 - 竖排在按钮上方 */}
+      {!isLoadingExif && exifData?.rating && exifData.rating > 0 && (
+        <div className="flex flex-col items-center mb-2 gap-1">
+          {Array.from({ length: exifData.rating }, (_, index) => (
+            <Star
+              key={index}
+              className="h-4 w-4 fill-yellow-400 text-yellow-400"
+              strokeWidth={STROKE_WIDTH}
+            />
+          ))}
+        </div>
+      )}
+
       <motion.div
         className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl transition-shadow dark:bg-stone-800/80"
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.2 }}
       >
-        <Info
-          className="h-6 w-6 text-stone-500 dark:text-stone-300"
-          strokeWidth={STROKE_WIDTH}
-        />
+        <Info className="h-6 w-6 text-stone-500 dark:text-stone-300" strokeWidth={STROKE_WIDTH} />
       </motion.div>
 
       <AnimatePresence>
@@ -114,8 +124,8 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
             animate="visible"
             exit="hidden"
             variants={panelVariants}
-            className="absolute bottom-full right-0 mb-3 w-72 bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl dark:bg-stone-900/50"
-            style={{ originX: 1, originY: 1 }}
+            className="absolute bottom-0 right-0 w-72 bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl dark:bg-stone-900/50"
+            style={{ originX: 1, originY: 1, marginBottom: '60px' }}
           >
             <div className="p-4">
               <div className="space-y-3">
@@ -206,10 +216,10 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
                   </div>
                   <div className="flex justify-between items-center py-1">
                     <span className="text-stone-500 dark:text-stone-400">
-                      作者（版权）
+                      作者
                     </span>
                     <span className="font-medium text-stone-700 dark:text-stone-300">
-                      zilin.im
+                      zilin
                     </span>
                   </div>
                 </div>
