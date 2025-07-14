@@ -13,7 +13,7 @@ interface GalleryMasonryProps {
 }
 
 const breakpointConfig = {
-  '640': 1, // sm
+  '640': 2, // sm
   '768': 2, // md
   '1024': 3, // lg
   '1280': 3, // xl

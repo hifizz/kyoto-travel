@@ -4,6 +4,7 @@ import type { PhotoData } from '../types';
 import Header from '@/components/Header';
 import GalleryMasonry from '@/components/GalleryMasonry';
 import PhotoView from '@/components/PhotoView';
+import Footer from '@/components/Footer';
 
 interface AppProps {
   photoData: PhotoData[];
@@ -43,6 +44,10 @@ export default function App({ photoData }: AppProps) {
         isActive={!!activePhoto}
         originRect={originRect}
       />
+
+      <div className="mt-10">
+        <Footer />
+      </div>
 
       <style>{`
         @keyframes clip-in {
