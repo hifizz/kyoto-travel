@@ -47,6 +47,8 @@ next-env.d.ts
 # Generated metadata (should be regenerated in each environment)
 /data/photo-metadata.json
 
+temp-images
+
 # Temporary template files
 env.local.template
 env.production.template

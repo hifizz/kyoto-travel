@@ -22,8 +22,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ] : [],
-    // 只在使用 CDN 时禁用优化
-    unoptimized: envInfo.shouldUploadToR2,
+    // 配置自定义loader以支持多尺寸图片
+    loader: envInfo.shouldUploadToR2 ? 'custom' : 'default',
+    loaderFile: envInfo.shouldUploadToR2 ? './lib/image-loader.js' : undefined,
+    // 在开发环境也禁用优化以避免任何潜在费用
+    unoptimized: false
   },
 
   // 如果需要静态导出，可以启用这个选项

@@ -25,7 +25,7 @@ export function isCIEnvironment(): boolean {
 export function shouldUploadToR2(): boolean {
   // 检查 R2 配置是否完整
   const hasR2Config = !!(
-    (process.env.R2_ACCOUNT_ID || process.env.ACCOUNT_ID) &&
+    process.env.ACCOUNT_ID &&
     process.env.R2_ACCESS_KEY_ID &&
     process.env.R2_SECRET_ACCESS_KEY &&
     process.env.R2_BUCKET_NAME &&
@@ -49,8 +49,7 @@ export function getEnvironmentInfo() {
     nodeEnv: process.env.NODE_ENV,
     assetPrefix: assetPrefix || '本地路径',
     shouldUploadToR2: shouldUpload,
-    hasR2Config: !!(
-      (process.env.R2_ACCOUNT_ID || process.env.ACCOUNT_ID) &&
+    hasR2Config: !!(process.env.ACCOUNT_ID &&
       process.env.R2_ACCESS_KEY_ID &&
       process.env.R2_SECRET_ACCESS_KEY &&
       process.env.R2_BUCKET_NAME &&

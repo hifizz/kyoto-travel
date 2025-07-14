@@ -8,6 +8,16 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { createReadStream } from 'fs';
 import dotenv from 'dotenv';
 
+// 加载环境变量 (仅在本地开发时)
+if (!process.env.VERCEL && !process.env.CI) {
+  // 本地开发环境才加载 .env 文件
+  if (process.env.NODE_ENV === 'production') {
+    dotenv.config({ path: '.env.production' });
+  } else {
+    dotenv.config({ path: '.env.development' });
+  }
+}
+
 // 获取当前文件的目录
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,8 +32,14 @@ const metadataOutputPath = path.join(rootDir, 'data/photo-metadata.json');
  * 环境检测函数
  */
 function shouldUploadToR2() {
+  // 只有明确设置 ENABLE_R2_UPLOAD=true 才上传
+  if (process.env.ENABLE_R2_UPLOAD !== 'true') {
+    console.log('⏭️  默认跳过R2上传和多尺寸生成，仅生成metadata');
+    return false;
+  }
+
   const hasR2Config = !!(
-    (process.env.R2_ACCOUNT_ID || process.env.ACCOUNT_ID) &&
+    process.env.ACCOUNT_ID &&
     process.env.R2_ACCESS_KEY_ID &&
     process.env.R2_SECRET_ACCESS_KEY &&
     process.env.R2_BUCKET_NAME &&
@@ -31,7 +47,14 @@ function shouldUploadToR2() {
   );
 
   const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
-  return hasR2Config && !!assetPrefix && assetPrefix.startsWith('https://');
+
+  if (!hasR2Config || !assetPrefix || !assetPrefix.startsWith('https://')) {
+    console.log('❌ R2配置不完整，无法上传');
+    return false;
+  }
+
+  console.log('✅ ENABLE_R2_UPLOAD=true，将生成多尺寸图片并上传');
+  return true;
 }
 
 /**
@@ -84,6 +107,41 @@ async function generateImageMetadata(imagePath) {
     console.error(`Error processing image ${imagePath}:`, error);
     throw error;
   }
+}
+
+/**
+ * 生成多尺寸图片变体
+ */
+async function generateMultipleSizes(imagePath, outputDir) {
+  const sizes = [400, 640, 960, 1280, 1920, 2880];
+  const filename = path.basename(imagePath, path.extname(imagePath));
+  const generatedFiles = [];
+
+  console.log(`🔄 Generating multiple sizes for ${filename}...`);
+
+  for (const size of sizes) {
+    const outputPath = path.join(outputDir, `${filename}_${size}w.jpg`);
+
+    try {
+      await sharp(imagePath)
+        .resize(size, null, {
+          withoutEnlargement: true,
+          fit: 'inside'
+        })
+        .jpeg({
+          quality: size <= 640 ? 85 : size <= 1280 ? 80 : 75, // 小图保持更高质量
+          progressive: true
+        })
+        .toFile(outputPath);
+
+      generatedFiles.push(outputPath);
+      console.log(`  ✓ Generated ${size}w version`);
+    } catch (error) {
+      console.error(`  ❌ Failed to generate ${size}w:`, error.message);
+    }
+  }
+
+  return generatedFiles;
 }
 
 /**
@@ -196,7 +254,7 @@ class R2Uploader {
  * 从环境变量创建 R2 配置
  */
 function createR2ConfigFromEnv() {
-  const accountId = process.env.R2_ACCOUNT_ID || process.env.ACCOUNT_ID;
+  const accountId = process.env.ACCOUNT_ID
   const accessKeyId = process.env.R2_ACCESS_KEY_ID;
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
   const bucketName = process.env.R2_BUCKET_NAME;
@@ -259,12 +317,53 @@ async function buildMetadata() {
     let uploadResults = {};
     const r2Config = createR2ConfigFromEnv();
 
-    if (shouldUploadToR2() && r2Config) {
-      uploader = new R2Uploader(r2Config);
-      console.log('☁️  CDN 模式：上传图片到 R2');
+    // 检查是否需要上传到R2
+    const shouldUpload = shouldUploadToR2();
+    const useCDNPaths = !!r2Config && !!process.env.NEXT_PUBLIC_ASSET_PREFIX && process.env.NEXT_PUBLIC_ASSET_PREFIX.startsWith('https://');
 
-      // 上传图片到 R2
-      uploadResults = await uploader.uploadImages(imagesDir, imageFiles);
+    if (shouldUpload && r2Config) {
+      uploader = new R2Uploader(r2Config);
+      console.log('☁️  CDN 模式：生成多尺寸图片并上传到 R2');
+
+      // 创建临时目录用于存放多尺寸图片
+      const tempDir = path.join(process.cwd(), 'temp-images');
+      await fs.mkdir(tempDir, { recursive: true });
+
+      try {
+        // 生成多尺寸图片
+        console.log('🔧 Generating multiple sizes for all images...');
+        const allGeneratedFiles = [];
+
+        for (const filename of imageFiles) {
+          const imagePath = path.join(imagesDir, filename);
+          const generatedFiles = await generateMultipleSizes(imagePath, tempDir);
+          allGeneratedFiles.push(...generatedFiles);
+        }
+
+        // 上传原图和所有尺寸变体到 R2
+        console.log('☁️  Uploading images to R2...');
+        uploadResults = await uploader.uploadImages(imagesDir, imageFiles);
+
+        // 上传多尺寸变体
+        const variantFiles = allGeneratedFiles.map(filepath => path.basename(filepath));
+        const variantUploadResults = await uploader.uploadImages(tempDir, variantFiles);
+
+        console.log(`✅ Uploaded ${imageFiles.length} original images and ${variantFiles.length} variants`);
+
+        // 清理临时目录
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (error) {
+        // 确保清理临时目录
+        await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+        throw error;
+      }
+    } else if (useCDNPaths) {
+      console.log('☁️  CDN 模式：跳过上传，使用CDN路径');
+      // 不上传但使用CDN路径（假设文件已存在）
+      const baseUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+      for (const filename of imageFiles) {
+        uploadResults[filename] = `${baseUrl}/images/${filename}`;
+      }
     } else {
       console.log('🏠 本地模式：使用本地图片路径');
       // 本地模式使用本地路径
