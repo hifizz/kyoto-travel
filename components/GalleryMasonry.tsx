@@ -59,7 +59,7 @@ const GalleryMasonry: React.FC<GalleryMasonryProps> = ({ onPhotoSelect, photoDat
               viewport={{ once: true, amount: 0.2 }}
               whileHover={{ scale: 1.03, y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-              className="rounded-lg overflow-hidden cursor-pointer group relative shadow-md hover:shadow-2xl transition-shadow duration-300 bg-stone-200 dark:bg-stone-900"
+              className="overflow-hidden cursor-pointer group relative shadow-md hover:shadow-2xl transition-shadow duration-300 bg-stone-200 dark:bg-stone-900"
               onClick={(e) => {
                 e.stopPropagation();
                 onPhotoSelect(photo, e.currentTarget.getBoundingClientRect());
