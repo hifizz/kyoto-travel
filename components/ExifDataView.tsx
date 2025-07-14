@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Info } from 'lucide-react';
+import { Info, Star } from 'lucide-react';
 import type { PhotoData } from '../types';
 import { readExifData } from '../utils/photoUtils';
 import { STROKE_WIDTH } from '../constants';
@@ -20,18 +20,20 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
       setIsLoadingExif(true);
       let isMounted = true;
 
-      readExifData(photo.original).then(data => {
-        if (isMounted) {
-          setExifData(data);
-          setIsLoadingExif(false);
-        }
-      }).catch(error => {
-        console.error("Failed to read EXIF data:", error);
-        if (isMounted) {
-          setIsLoadingExif(false);
-          setExifData({}); // Set to empty object on error
-        }
-      });
+      readExifData(photo.original)
+        .then((data) => {
+          if (isMounted) {
+            setExifData(data);
+            setIsLoadingExif(false);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to read EXIF data:', error);
+          if (isMounted) {
+            setIsLoadingExif(false);
+            setExifData({}); // Set to empty object on error
+          }
+        });
 
       return () => {
         isMounted = false;
@@ -41,18 +43,50 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
     }
   }, [photo]);
 
+  // 渲染星星评分
+  const renderStarRating = (rating?: number) => {
+    if (!rating || rating < 1 || rating > 5) {
+      return <span className="text-stone-400 dark:text-stone-500">无评分</span>;
+    }
+
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-3 w-3 ${
+              star <= rating
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'text-stone-300 dark:text-stone-600'
+            }`}
+            strokeWidth={STROKE_WIDTH}
+          />
+        ))}
+        <span className="ml-1 text-xs text-stone-500 dark:text-stone-400">
+          ({rating}/5)
+        </span>
+      </div>
+    );
+  };
+
   const panelVariants: Variants = {
     hidden: {
       opacity: 0,
-      y: 50,
-      height: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+      scale: 0.95,
+      y: 10,
+      transition: {
+        duration: 0.2,
+        ease: 'easeOut',
+      },
     },
     visible: {
       opacity: 1,
+      scale: 1,
       y: 0,
-      height: 'auto',
-      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+      transition: {
+        duration: 0.25,
+        ease: 'easeOut',
+      },
     },
   };
 
@@ -64,8 +98,13 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
     >
       <motion.div
         className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl transition-shadow dark:bg-stone-800/80"
+        whileHover={{ scale: 1.05 }}
+        transition={{ duration: 0.2 }}
       >
-        <Info className="h-6 w-6 text-stone-500 dark:text-stone-300" strokeWidth={STROKE_WIDTH} />
+        <Info
+          className="h-6 w-6 text-stone-500 dark:text-stone-300"
+          strokeWidth={STROKE_WIDTH}
+        />
       </motion.div>
 
       <AnimatePresence>
@@ -75,67 +114,104 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
             animate="visible"
             exit="hidden"
             variants={panelVariants}
-            className="absolute bottom-full right-0 mb-3 w-72 p-4 bg-white/90 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden dark:bg-stone-900/90"
+            className="absolute bottom-full right-0 mb-3 w-72 bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl dark:bg-stone-900/50"
             style={{ originX: 1, originY: 1 }}
           >
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-medium text-stone-800 border-b border-stone-200 pb-2 flex-1 dark:text-stone-200 dark:border-stone-700">
-                  摄影参数
-                </h3>
-                {isLoadingExif && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-stone-600 dark:border-stone-400"></div>
-                )}
-              </div>
+            <div className="p-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-medium text-stone-800 border-b border-stone-200 pb-2 flex-1 dark:text-stone-200 dark:border-stone-700">
+                    摄影参数
+                  </h3>
+                  {isLoadingExif && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-stone-600 dark:border-stone-400"></div>
+                  )}
+                </div>
 
-              <div className="grid grid-cols-1 gap-2 text-xs">
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">相机</span>
-                  <span className="font-medium text-stone-700 text-right dark:text-stone-300">
-                    {exifData?.camera || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">镜头</span>
-                  <span className="font-medium text-stone-700 text-right dark:text-stone-300">
-                    {exifData?.lens || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">ISO</span>
-                  <span className="font-medium text-stone-700 dark:text-stone-300">
-                    {exifData?.iso || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">光圈</span>
-                  <span className="font-medium text-stone-700 dark:text-stone-300">
-                    {exifData?.aperture || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">快门</span>
-                  <span className="font-medium text-stone-700 dark:text-stone-300">
-                    {exifData?.shutterSpeed || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">焦距</span>
-                  <span className="font-medium text-stone-700 dark:text-stone-300">
-                    {exifData?.focalLength || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">拍摄时间</span>
-                  <span className="font-medium text-stone-700 text-right dark:text-stone-300">
-                    {exifData?.shootingDate || '读取中...'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-stone-500 dark:text-stone-400">文件名</span>
-                  <span className="font-medium text-stone-700 dark:text-stone-300">
-                    {photo?.original.split('/').pop()}
-                  </span>
+                <div className="grid grid-cols-1 gap-2 text-xs">
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      照片评分
+                    </span>
+                    <div className="font-medium text-stone-700 dark:text-stone-300">
+                      {isLoadingExif
+                        ? '读取中...'
+                        : renderStarRating(exifData?.rating)}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      相机
+                    </span>
+                    <span className="font-medium text-stone-700 text-right dark:text-stone-300">
+                      {exifData?.camera || '读取中...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      镜头
+                    </span>
+                    <span className="font-medium text-stone-700 text-right dark:text-stone-300">
+                      {exifData?.lens || '读取中...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      ISO
+                    </span>
+                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                      {exifData?.iso || '读取中...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      光圈
+                    </span>
+                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                      {exifData?.aperture || '读取中...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      快门
+                    </span>
+                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                      {exifData?.shutterSpeed || '读取中...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      焦距
+                    </span>
+                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                      {exifData?.focalLength || '读取中...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      拍摄时间
+                    </span>
+                    <span className="font-medium text-stone-700 text-right dark:text-stone-300">
+                      {exifData?.shootingDate || '读取中...'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      文件名
+                    </span>
+                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                      {photo?.original.split('/').pop()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-stone-500 dark:text-stone-400">
+                      作者（版权）
+                    </span>
+                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                      zilin.im
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

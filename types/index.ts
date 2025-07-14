@@ -18,6 +18,7 @@ export interface PhotoData {
     shutterSpeed?: string;
     focalLength?: string;
     shootingDate?: string;
+    rating?: number; // 照片评分（1-5星）
     rawExif?: Record<string, unknown>;
   };
 }
@@ -32,4 +33,4 @@ export interface PhotoViewProps {
   onClose: () => void;
   isActive: boolean;
   originRect: DOMRect | null;
-} 
+}

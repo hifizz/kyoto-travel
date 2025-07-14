@@ -7,6 +7,8 @@ export const readExifData = async (imageSrc: string): Promise<PhotoData['exifDat
     const exif = await exifr.parse(imageSrc, {
       tiff: true,
       exif: true,
+      iptc: true,
+      xmp: true,
       gps: false,
       interop: false,
       ifd1: false,
@@ -50,6 +52,9 @@ export const readExifData = async (imageSrc: string): Promise<PhotoData['exifDat
       });
     }
 
+    // 读取照片评分
+    const rating = exif.Rating ? Number(exif.Rating) : undefined;
+
     return {
       camera,
       lens,
@@ -58,6 +63,7 @@ export const readExifData = async (imageSrc: string): Promise<PhotoData['exifDat
       shutterSpeed,
       focalLength,
       shootingDate,
+      rating,
       // 保存原始EXIF数据以备需要
       rawExif: exif,
     };

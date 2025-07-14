@@ -319,7 +319,7 @@ async function buildMetadata() {
 
     // 检查是否需要上传到R2
     const shouldUpload = shouldUploadToR2();
-    const useCDNPaths = !!r2Config && !!process.env.NEXT_PUBLIC_ASSET_PREFIX && process.env.NEXT_PUBLIC_ASSET_PREFIX.startsWith('https://');
+    const useCDNPaths = shouldUpload && !!r2Config && !!process.env.NEXT_PUBLIC_ASSET_PREFIX && process.env.NEXT_PUBLIC_ASSET_PREFIX.startsWith('https://');
 
     if (shouldUpload && r2Config) {
       uploader = new R2Uploader(r2Config);

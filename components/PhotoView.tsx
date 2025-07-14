@@ -195,8 +195,8 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           </div>
         )}
 
-        {/* 导航提示 */}
-        <div className="absolute top-6 left-6 text-stone-600 text-sm font-light dark:text-stone-400">
+        {/* 导航提示 - 移动到右下角，在 ExifDataView 左边 */}
+        <div className="absolute bottom-6 right-24 text-stone-600 text-sm font-light dark:text-stone-400 ml-3">
           <span>
             {currentIndex + 1} / {totalCount}
           </span>
@@ -211,7 +211,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           <X className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
         </button>
 
-        {/* 左右导航按钮 */}
+        {/* 左右导航按钮 - 在移动端隐藏 */}
         <AnimatePresence>
           {showNavButtons && (
             <>
@@ -226,7 +226,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                   cancelHideTimer();
                 }}
                 onMouseLeave={startHideTimer}
-                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Previous photo"
               >
                 <ArrowLeft className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
@@ -243,7 +243,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                   cancelHideTimer();
                 }}
                 onMouseLeave={startHideTimer}
-                className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+                className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Next photo"
               >
                 <ArrowRight className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
@@ -252,37 +252,36 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           )}
         </AnimatePresence>
 
-        {/* 主内容区: 图片和文字 - 改为 Grid 布局 */}
-        <div className="w-full h-full grid grid-rows-[1fr_auto] p-4 md:p-8">
-          {/* 图片容器 - 增加了 min-h-0 来配合 Grid 布局 */}
-          <div className="relative w-full flex items-center justify-center min-h-0">
-            <AnimatePresence initial={false}>
-              <motion.img
-                key={displayedPhoto.id}
-                ref={imageRef}
-                src={imageStatus === "loaded" ? displayedPhoto.original : undefined}
-                alt={displayedPhoto.title}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                className="absolute max-w-full max-h-full object-contain shadow-2xl"
-                style={{ opacity: imageStatus === "loaded" ? 1 : 0 }} // 初始渲染透明度控制
-              />
-            </AnimatePresence>
-            {imageStatus === "error" && (
-              <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
-                <p className="text-red-500">图片加载失败</p>
-              </div>
-            )}
+        {/* 主内容区: 图片和描述 - 重新设计布局 */}
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          {/* 图片容器 - calc(100vh - 40px) 高度，固定尺寸避免抖动 */}
+          <div className="relative w-full flex items-center justify-center" style={{ height: 'calc(100vh - 40px)' }}>
+            <div className="relative w-full h-full flex items-center justify-center">
+              <AnimatePresence initial={false}>
+                <motion.img
+                  key={displayedPhoto.id}
+                  ref={imageRef}
+                  src={imageStatus === "loaded" ? displayedPhoto.original : undefined}
+                  alt={displayedPhoto.title}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="absolute max-w-full max-h-full object-contain shadow-2xl"
+                  style={{ opacity: imageStatus === "loaded" ? 1 : 0 }}
+                />
+              </AnimatePresence>
+              {imageStatus === "error" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
+                  <p className="text-red-500">图片加载失败</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 文字信息容器 */}
-          <div className="w-full text-center py-4 md:py-6 pb-0 md:pb-0 flex-shrink-0">
-            <h2 className="text-2xl lg:text-3xl font-thin tracking-widest text-stone-900 mb-2 dark:text-stone-200" data-title={displayedPhoto.title}>
-              {displayedPhoto.title}
-            </h2>
-            <p className="text-sm lg:text-base font-light leading-relaxed text-stone-600 max-w-2xl mx-auto dark:text-stone-400">
+          {/* 描述信息容器 - 固定 40px 高度 */}
+          <div className="w-full text-left flex items-end justify-center h-10 px-4">
+            <p className="text-sm lg:text-base font-light leading-relaxed text-stone-600 max-w-2xl dark:text-stone-400">
               {displayedPhoto.description}
             </p>
           </div>
