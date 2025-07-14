@@ -176,7 +176,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   } as React.CSSProperties;
 
   const containerClasses = `
-    fixed inset-0 bg-stone-100 bg-opacity-95 backdrop-blur-sm z-50 dark:bg-black/90
+    fixed inset-0 bg-stone-100/90 bg-opacity-95 backdrop-blur-md z-[999999] dark:bg-black/90
     transition-all duration-500 ease-in-out
     ${isActive && !isClosing ? 'animate-clip-in' : 'animate-clip-out'}
   `;
@@ -257,7 +257,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
         {/* 主内容区: 左右分栏布局 */}
         <div className="w-full h-full flex">
           {/* 左侧图片区域 */}
-          <div className="flex-1 relative flex items-center justify-center bg-stone-50 dark:bg-stone-950 p-2">
+          <div className="flex-1 relative flex items-center justify-center p-2">
             <div className="relative w-full h-full flex items-center justify-center">
               <AnimatePresence initial={false}>
                 <motion.img

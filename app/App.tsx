@@ -30,7 +30,10 @@ export default function App({ photoData }: AppProps) {
     <div className="min-h-screen bg-stone-100 font-sans antialiased dark:bg-black">
       <main className="max-w-7xl mx-auto">
         <Header />
-        <GalleryMasonry onPhotoSelect={handlePhotoSelect} photoData={photoData} />
+        <GalleryMasonry
+          onPhotoSelect={handlePhotoSelect}
+          photoData={photoData}
+        />
       </main>
 
       <PhotoView
