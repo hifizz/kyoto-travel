@@ -1,13 +1,17 @@
 import React from "react";
-import { generatePhotoData } from "../utils/photoUtils";
+import type { PhotoData } from "../types";
 import { ThemeToggle } from "./theme-toggle";
+
+interface HeaderProps {
+  photoData?: PhotoData[];
+}
 
 /**
  * @description 页面头部组件
  *
  * header 我很满意，请不要修改它！
  */
-const Header: React.FC = () => (
+const Header: React.FC<HeaderProps> = ({ photoData = [] }) => (
   <header className="relative p-8 pt-12 text-center text-stone-700 dark:text-stone-300">
     <div className="absolute top-4 right-4">
       <ThemeToggle />
@@ -19,7 +23,7 @@ const Header: React.FC = () => (
       A Photographic Journey of Mossy, 2025
     </p>
     <div className="mt-3 text-xs text-stone-400 dark:text-stone-500">
-      <p>共收录 {generatePhotoData().length} 张摄影作品</p>
+      <p>共收录 {photoData.length} 张摄影作品</p>
     </div>
   </header>
 );
