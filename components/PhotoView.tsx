@@ -176,9 +176,6 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       style={clipPathStyle}
       className={containerClasses}
       onMouseMove={handleMouseMove}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
       <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center">
         {/* 加载指示器 */}
@@ -209,35 +206,34 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           <X className="h-5 w-5 md:h-6 md:w-6" strokeWidth={STROKE_WIDTH} />
         </button>
 
-        {/* 左右导航按钮 - 在移动端隐藏 */}
+        {/* 导航按钮 */}
         <AnimatePresence>
-          {showNavButtons && (
+          {showNavButtons && totalCount > 1 && (
             <>
               <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => handleNavigate('prev')}
-                onMouseMove={(e) => {
-                  e.stopPropagation();
+                onMouseEnter={() => {
+                  setShowNavButtons(true);
                   cancelHideTimer();
                 }}
                 onMouseLeave={startHideTimer}
-                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
                 aria-label="Previous photo"
               >
                 <ArrowLeft className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
               </motion.button>
-
               <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => handleNavigate('next')}
-                onMouseMove={(e) => {
-                  e.stopPropagation();
+                onMouseEnter={() => {
+                  setShowNavButtons(true);
                   cancelHideTimer();
                 }}
                 onMouseLeave={startHideTimer}
@@ -253,7 +249,12 @@ const PhotoView: React.FC<PhotoViewProps> = ({
         {/* 主内容区: 响应式布局 */}
         <div className="w-full h-full flex flex-col lg:flex-row">
           {/* 图片区域 */}
-          <div className="flex-1 relative flex items-center justify-center p-2 md:p-4">
+          <div
+            className="flex-1 relative flex items-center justify-center p-2 md:p-4"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div className="relative w-full h-full flex items-center justify-center">
               <AnimatePresence initial={false}>
                 <motion.div
