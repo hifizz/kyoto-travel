@@ -13,6 +13,7 @@ interface GalleryMasonryProps {
 }
 
 const breakpointConfig = {
+  '375': 2, // iPhone及以上
   '640': 2, // sm
   '768': 2, // md
   '1024': 3, // lg

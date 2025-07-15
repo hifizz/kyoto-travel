@@ -300,7 +300,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                       ? displayedPhoto.original
                       : undefined
                   }
-                  alt={displayedPhoto.title}
+                  alt={displayedPhoto.location ?? ''}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
