@@ -13,7 +13,7 @@ interface HeaderProps {
  */
 const Header: React.FC<HeaderProps> = ({ photoData = [] }) => (
   <header className="relative p-8 pt-12 text-center text-stone-700 dark:text-stone-300">
-    <div className="absolute top-4 right-4">
+    <div className="fixed top-4 right-4 z-50">
       <ThemeToggle />
     </div>
     <h1 className="text-4xl md:text-5xl font-thin tracking-widest uppercase">
