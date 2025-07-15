@@ -6,6 +6,9 @@ import type { PhotoViewProps, PhotoData } from '../types';
 import { STROKE_WIDTH } from '../constants';
 import ExifInfoPreview from './ExifInfoPreview';
 import imageLoader from '@/lib/image-loader';
+import { ZenModeProvider } from './zen-mode/ZenModeProvider';
+import { ZenModeToggle } from './zen-mode/ZenModeToggle';
+import { ZenModeOverlay } from './zen-mode/ZenModeOverlay';
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
@@ -42,7 +45,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const displayedPhoto = currentIndex > -1 ? photoData[currentIndex] : null;
   const totalCount = photoData.length;
 
-    // Next/Image 自动处理图片加载和blurhash占位符
+  // Next/Image 自动处理图片加载和blurhash占位符
 
   const startHideTimer = useCallback(() => {
     if (navButtonTimerRef.current) {
@@ -169,168 +172,207 @@ const PhotoView: React.FC<PhotoViewProps> = ({
     ${isActive && !isClosing ? 'animate-clip-in' : 'animate-clip-out'}
   `;
 
+  // Zen Mode 导航处理函数
+  const handleZenNext = useCallback(() => {
+    if (currentIndex < totalCount - 1) {
+      handleNavigate('next');
+    }
+  }, [currentIndex, totalCount, handleNavigate]);
+
+  const handleZenPrevious = useCallback(() => {
+    if (currentIndex > 0) {
+      handleNavigate('prev');
+    }
+  }, [currentIndex, handleNavigate]);
+
+  const handleZenClose = useCallback(() => {
+    // zen mode 关闭时不退出 PhotoView，保持在当前状态
+    // 这个函数会被 ZenModeOverlay 调用，它会处理 zen mode 的退出
+  }, []);
+
   if (!displayedPhoto) return null;
 
   return (
-    <div
-      style={clipPathStyle}
-      className={containerClasses}
-      onMouseMove={handleMouseMove}
-    >
-      <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center">
-        {/* 加载指示器 */}
-        {showLoadingIndicator && imageStatus === 'loading' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-stone-100/80 dark:bg-black/80">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-600 dark:border-stone-400"></div>
-          </div>
-        )}
-
-        {/* 导航提示 - 移动端在左上角，桌面端在右侧信息栏 */}
-        <div className="absolute top-4 left-4 md:hidden text-stone-600 text-xs font-light dark:text-stone-400">
-          <span>
-            {currentIndex + 1} / {totalCount}
-          </span>
-        </div>
-
-        {/* 移动端滑动提示 */}
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 md:hidden px-3 py-1 bg-black/40 rounded-full text-white text-xs backdrop-blur-sm">
-          <span>← 滑动切换 →</span>
-        </div>
-
-        {/* 关闭按钮 */}
-        <button
-          onClick={handleClose}
-          className="absolute top-2 right-2 md:top-3 md:right-3 w-10 h-10 md:w-12 md:h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
-          aria-label="Close photo view"
-        >
-          <X className="h-5 w-5 md:h-6 md:w-6" strokeWidth={STROKE_WIDTH} />
-        </button>
-
-        {/* 导航按钮 */}
-        <AnimatePresence>
-          {showNavButtons && totalCount > 1 && (
-            <>
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => handleNavigate('prev')}
-                onMouseEnter={() => {
-                  setShowNavButtons(true);
-                  cancelHideTimer();
-                }}
-                onMouseLeave={startHideTimer}
-                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
-                aria-label="Previous photo"
-              >
-                <ArrowLeft className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
-              </motion.button>
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => handleNavigate('next')}
-                onMouseEnter={() => {
-                  setShowNavButtons(true);
-                  cancelHideTimer();
-                }}
-                onMouseLeave={startHideTimer}
-                className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
-                aria-label="Next photo"
-              >
-                <ArrowRight className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
-              </motion.button>
-            </>
+    <ZenModeProvider>
+      <div
+        style={clipPathStyle}
+        className={containerClasses}
+        onMouseMove={handleMouseMove}
+      >
+        <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center">
+          {/* 加载指示器 */}
+          {showLoadingIndicator && imageStatus === 'loading' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-stone-100/80 dark:bg-black/80">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-600 dark:border-stone-400"></div>
+            </div>
           )}
-        </AnimatePresence>
 
-        {/* 主内容区: 响应式布局 */}
-        <div className="w-full h-full flex flex-col lg:flex-row">
-          {/* 图片区域 */}
-          <div
-            className="flex-1 relative flex items-center justify-center p-2 md:p-4"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div className="relative w-full h-full flex items-center justify-center">
-              <AnimatePresence initial={false}>
-                <motion.div
-                  key={displayedPhoto.id}
-                  className="absolute inset-0 flex items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, ease: 'easeInOut' }}
-                >
-                  <Image
-                    loader={imageLoader}
-                    src={displayedPhoto.original}
-                    alt={displayedPhoto.location || '京都旅行照片'}
-                    width={displayedPhoto.width}
-                    height={displayedPhoto.height}
-                    placeholder="blur"
-                    blurDataURL={displayedPhoto.blurDataURL}
-                    className="max-w-full max-h-full object-contain"
-                    style={{
-                      maxWidth:
-                        displayedPhoto.width > displayedPhoto.height
-                          ? '100%'
-                          : 'auto',
-                      maxHeight:
-                        displayedPhoto.height >= displayedPhoto.width
-                          ? '100%'
-                          : 'auto',
-                    }}
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              {imageStatus === 'error' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
-                  <p className="text-red-500">图片加载失败</p>
-                </div>
-              )}
-            </div>
+          {/* 导航提示 - 移动端在左上角，桌面端在右侧信息栏 */}
+          <div className="absolute top-4 left-4 md:hidden text-stone-600 text-xs font-light dark:text-stone-400">
+            <span>
+              {currentIndex + 1} / {totalCount}
+            </span>
           </div>
 
-          {/* 文字面板 - 移动端在底部，桌面端在右侧 */}
-          <div className="w-full md:w-full lg:max-w-[280px] ">
-            <div className="h-full flex flex-col py-3 px-4 md:py-5 md:px-5">
-              {/* 桌面端导航提示 */}
-              <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400">
-                <span>
-                  {currentIndex + 1} / {totalCount}
-                </span>
-              </div>
+          {/* 移动端滑动提示 */}
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 md:hidden px-3 py-1 bg-black/40 rounded-full text-white text-xs backdrop-blur-sm">
+            <span>← 滑动切换 →</span>
+          </div>
 
-              {/* 标题和描述 */}
-              <div className="flex-1 flex flex-col justify-between pb-0 pt-2 md:pt-0">
-                <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 md:pt-12">
-                  {displayedPhoto.location && (
-                    <p className="text-base md:text-lg font-medium text-stone-700 dark:text-stone-300">
-                      {displayedPhoto.location}
-                    </p>
-                  )}
-                  {displayedPhoto.description && (
-                    <p className="text-sm md:text-base">
-                      {displayedPhoto.description}
-                    </p>
-                  )}
+          {/* 关闭按钮 */}
+          <button
+            onClick={handleClose}
+            className="absolute top-2 right-2 md:top-3 md:right-3 w-10 h-10 md:w-12 md:h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+            aria-label="Close photo view"
+          >
+            <X className="h-5 w-5 md:h-6 md:w-6" strokeWidth={STROKE_WIDTH} />
+          </button>
+
+          {/* 导航按钮 */}
+          <AnimatePresence>
+            {showNavButtons && totalCount > 1 && (
+              <>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => handleNavigate('prev')}
+                  onMouseEnter={() => {
+                    setShowNavButtons(true);
+                    cancelHideTimer();
+                  }}
+                  onMouseLeave={startHideTimer}
+                  className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+                  aria-label="Previous photo"
+                >
+                  <ArrowLeft className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
+                </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => handleNavigate('next')}
+                  onMouseEnter={() => {
+                    setShowNavButtons(true);
+                    cancelHideTimer();
+                  }}
+                  onMouseLeave={startHideTimer}
+                  className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-500 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 hidden md:flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+                  aria-label="Next photo"
+                >
+                  <ArrowRight className="h-6 w-6" strokeWidth={STROKE_WIDTH} />
+                </motion.button>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* 主内容区: 响应式布局 */}
+          <div className="w-full h-full flex flex-col lg:flex-row">
+            {/* 图片区域 */}
+            <div
+              className="flex-1 relative flex items-center justify-center p-2 md:p-4"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="relative w-full h-full flex items-center justify-center">
+                <AnimatePresence initial={false}>
+                  <motion.div
+                    key={displayedPhoto.id}
+                    className="absolute inset-0 flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                  >
+                    <Image
+                      loader={imageLoader}
+                      src={displayedPhoto.original}
+                      // 不要设置location的默认值
+                      alt={displayedPhoto.location || ''}
+                      width={displayedPhoto.width}
+                      height={displayedPhoto.height}
+                      placeholder="blur"
+                      blurDataURL={displayedPhoto.blurDataURL}
+                      className="max-w-full max-h-full object-contain"
+                      style={{
+                        maxWidth:
+                          displayedPhoto.width > displayedPhoto.height
+                            ? '100%'
+                            : 'auto',
+                        maxHeight:
+                          displayedPhoto.height >= displayedPhoto.width
+                            ? '100%'
+                            : 'auto',
+                      }}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {imageStatus === 'error' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
+                    <p className="text-red-500">图片加载失败</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 文字面板 - 移动端在底部，桌面端在右侧 */}
+            <div className="w-full md:w-full lg:max-w-[280px] ">
+              <div className="h-full flex flex-col py-3 px-4 md:py-5 md:px-5">
+                {/* 桌面端导航提示 */}
+                <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400 flex items-center">
+                  <span>
+                    {currentIndex + 1} / {totalCount}
+                  </span>
+
+                  {/* 沉浸模式按钮 */}
+                  <span className="ml-2">
+                    <ZenModeToggle />
+                  </span>
                 </div>
 
-                {/* EXIF 信息预览 */}
-                <div className="mt-3 md:mt-0">
-                  <ExifInfoPreview photo={displayedPhoto} authorName="zilin" />
+                {/* 标题和描述 */}
+                <div className="flex-1 flex flex-col justify-between pb-0 pt-2 md:pt-0">
+                  <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 md:pt-12">
+                    {displayedPhoto.location && (
+                      <p className="text-base md:text-lg font-medium text-stone-700 dark:text-stone-300">
+                        {displayedPhoto.location}
+                      </p>
+                    )}
+                    {displayedPhoto.description && (
+                      <p className="text-sm md:text-base">
+                        {displayedPhoto.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* EXIF 信息预览 */}
+                  <div className="mt-3 md:mt-0">
+                    <ExifInfoPreview
+                      photo={displayedPhoto}
+                      authorName="zilin"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Zen Mode Overlay */}
+        <ZenModeOverlay
+          photo={displayedPhoto}
+          onClose={handleZenClose}
+          onNext={handleZenNext}
+          onPrevious={handleZenPrevious}
+          hasNext={currentIndex < totalCount - 1}
+          hasPrevious={currentIndex > 0}
+        />
       </div>
-    </div>
+    </ZenModeProvider>
   );
 };
 
