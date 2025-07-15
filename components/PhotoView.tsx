@@ -1,9 +1,11 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import type { PhotoViewProps, PhotoData } from '../types';
 import { STROKE_WIDTH } from '../constants';
 import ExifInfoPreview from './ExifInfoPreview';
+import imageLoader from '@/lib/image-loader';
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
@@ -40,45 +42,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const displayedPhoto = currentIndex > -1 ? photoData[currentIndex] : null;
   const totalCount = photoData.length;
 
-  // 核心图片加载逻辑
-  useEffect(() => {
-    if (!displayedPhoto) return;
-
-    setImageStatus('loading');
-    setShowLoadingIndicator(false); // 每次都重置
-
-    // 清除上一个定时器
-    if (loadingTimerRef.current) {
-      clearTimeout(loadingTimerRef.current);
-    }
-
-    // 设置延迟显示loading的定时器
-    loadingTimerRef.current = window.setTimeout(() => {
-      setShowLoadingIndicator(true);
-    }, 800);
-
-    const img = new Image();
-    img.onload = () => {
-      setImageStatus('loaded');
-      if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
-      setShowLoadingIndicator(false);
-    };
-    img.onerror = () => {
-      setImageStatus('error');
-      if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
-      setShowLoadingIndicator(false); // 也可能需要显示错误状态
-    };
-    img.src = displayedPhoto.original;
-
-    // 清理函数
-    return () => {
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current);
-      }
-      img.onload = null;
-      img.onerror = null;
-    };
-  }, [displayedPhoto]);
+    // Next/Image 自动处理图片加载和blurhash占位符
 
   const startHideTimer = useCallback(() => {
     if (navButtonTimerRef.current) {
@@ -224,8 +188,8 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           </div>
         )}
 
-        {/* 导航提示 - 移动端在顶部中央，桌面端在左下角 */}
-        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 md:top-auto md:bottom-6 md:left-6 md:transform-none px-2 py-1 md:px-0 md:py-0 bg-black/40 md:bg-transparent rounded-full md:rounded-none text-white md:text-stone-600 text-xs md:text-sm font-mono md:font-light backdrop-blur-sm md:backdrop-blur-none dark:md:text-stone-400">
+        {/* 导航提示 - 移动端在左上角，桌面端在右侧信息栏 */}
+        <div className="absolute top-4 left-4 md:hidden text-stone-600 text-xs font-light dark:text-stone-400">
           <span>
             {currentIndex + 1} / {totalCount}
           </span>
@@ -292,33 +256,37 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           <div className="flex-1 relative flex items-center justify-center p-2 md:p-4">
             <div className="relative w-full h-full flex items-center justify-center">
               <AnimatePresence initial={false}>
-                <motion.img
+                <motion.div
                   key={displayedPhoto.id}
-                  ref={imageRef}
-                  src={
-                    imageStatus === 'loaded'
-                      ? displayedPhoto.original
-                      : undefined
-                  }
-                  alt={displayedPhoto.location ?? ''}
+                  className="absolute inset-0 flex items-center justify-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, ease: 'easeInOut' }}
-                  className="absolute max-w-full max-h-full object-contain shadow-2xl"
-                  style={{
-                    opacity: imageStatus === 'loaded' ? 1 : 0,
-                    maxWidth:
-                      displayedPhoto.width > displayedPhoto.height
-                        ? '100%'
-                        : 'auto',
-                    maxHeight:
-                      displayedPhoto.height >= displayedPhoto.width
-                        ? '100%'
-                        : 'auto',
-                  }}
-                />
+                >
+                  <Image
+                    loader={imageLoader}
+                    src={displayedPhoto.original}
+                    alt={displayedPhoto.location || '京都旅行照片'}
+                    width={displayedPhoto.width}
+                    height={displayedPhoto.height}
+                    placeholder="blur"
+                    blurDataURL={displayedPhoto.blurDataURL}
+                    className="max-w-full max-h-full object-contain shadow-2xl"
+                    style={{
+                      maxWidth:
+                        displayedPhoto.width > displayedPhoto.height
+                          ? '100%'
+                          : 'auto',
+                      maxHeight:
+                        displayedPhoto.height >= displayedPhoto.width
+                          ? '100%'
+                          : 'auto',
+                    }}
+                  />
+                </motion.div>
               </AnimatePresence>
+
               {imageStatus === 'error' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50 dark:bg-black/50">
                   <p className="text-red-500">图片加载失败</p>
@@ -330,8 +298,15 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           {/* 文字面板 - 移动端在底部，桌面端在右侧 */}
           <div className="w-full md:w-full lg:max-w-[280px] ">
             <div className="h-full flex flex-col py-3 px-4 md:py-5 md:px-5">
+              {/* 桌面端导航提示 */}
+              <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400">
+                <span>
+                  {currentIndex + 1} / {totalCount}
+                </span>
+              </div>
+
               {/* 标题和描述 */}
-              <div className="flex-1 flex flex-col justify-between pb-0 pt-2 md:pt-20">
+              <div className="flex-1 flex flex-col justify-between pb-0 pt-2 md:pt-0">
                 <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 ">
                   {displayedPhoto.location && (
                     <p className="text-base md:text-lg font-medium text-stone-700 dark:text-stone-300">
