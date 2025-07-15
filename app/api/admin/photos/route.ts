@@ -8,7 +8,8 @@ function isDevelopment() {
   return process.env.NODE_ENV === 'development' || process.env.ADMIN_SECRET === process.env.ADMIN_SECRET_VALUE;
 }
 
-export async function GET(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_request: NextRequest) {
   // 安全检查：只允许开发环境或有正确密钥访问
   if (!isDevelopment()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     try {
       const configData = await fs.readFile(configPath, 'utf-8');
       existingConfig = JSON.parse(configData);
-    } catch (error) {
+    } catch {
       console.warn('无法读取配置文件，将创建新配置');
     }
 

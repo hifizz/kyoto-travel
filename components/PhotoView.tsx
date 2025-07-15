@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import type { PhotoViewProps, PhotoData } from '../types';
+import type { PhotoViewProps } from '../types';
 import { STROKE_WIDTH } from '../constants';
 import ExifInfoPreview from './ExifInfoPreview';
 import imageLoader from '@/lib/image-loader';
@@ -24,10 +24,8 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [imageStatus, setImageStatus] = useState<ImageStatus>('loading');
-  const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
+  const [showLoadingIndicator] = useState(false);
   const [showNavButtons, setShowNavButtons] = useState(true);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const loadingTimerRef = useRef<number | null>(null);
   const navButtonTimerRef = useRef<number | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState<number>(-1);

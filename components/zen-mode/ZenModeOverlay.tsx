@@ -25,11 +25,16 @@ export const ZenModeOverlay: React.FC<ZenModeOverlayProps> = ({
 }) => {
   const { isZenMode, showControls, exitZenMode, isMobile } = useZenMode();
 
+  const handleClose = useCallback(() => {
+    exitZenMode();
+    onClose();
+  }, [exitZenMode, onClose]);
+
   const handleEscapeKey = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       handleClose();
     }
-  }, []);
+  }, [handleClose]);
 
   const handleArrowKeys = useCallback((event: KeyboardEvent) => {
     if (event.key === 'ArrowLeft' && hasPrevious) {
@@ -38,11 +43,6 @@ export const ZenModeOverlay: React.FC<ZenModeOverlayProps> = ({
       onNext();
     }
   }, [hasNext, hasPrevious, onNext, onPrevious]);
-
-  const handleClose = useCallback(() => {
-    exitZenMode();
-    onClose();
-  }, [exitZenMode, onClose]);
 
   useEffect(() => {
     if (isZenMode) {

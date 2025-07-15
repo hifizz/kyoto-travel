@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { PhotoData } from '../types';
 import Header from '@/components/Header';
 import GalleryMasonry from '@/components/GalleryMasonry';
