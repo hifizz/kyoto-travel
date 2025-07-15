@@ -10,6 +10,42 @@ interface AppProps {
   photoData: PhotoData[];
 }
 
+const freezeBody = () => {
+  // 锁定body滚动
+  const originalOverflow = document.body.style.overflow;
+  const originalPaddingRight = document.body.style.paddingRight;
+
+  // 获取滚动条宽度来避免布局抖动
+  const scrollBarWidth =
+    window.innerWidth - document.documentElement.clientWidth;
+
+  // 锁定滚动
+  document.body.style.overflow = 'hidden';
+  document.body.style.paddingRight = `${scrollBarWidth}px`;
+
+  // 保存原始值到元素属性上，以便恢复时使用
+  document.body.setAttribute('data-original-overflow', originalOverflow);
+  document.body.setAttribute(
+    'data-original-padding-right',
+    originalPaddingRight
+  );
+};
+
+const releaseBody = () => {
+  // 恢复body滚动
+  const originalOverflow =
+    document.body.getAttribute('data-original-overflow') || '';
+  const originalPaddingRight =
+    document.body.getAttribute('data-original-padding-right') || '';
+
+  document.body.style.overflow = originalOverflow;
+  document.body.style.paddingRight = originalPaddingRight;
+
+  // 清理属性
+  document.body.removeAttribute('data-original-overflow');
+  document.body.removeAttribute('data-original-padding-right');
+};
+
 /**
  * @description 主应用组件
  */
@@ -17,29 +53,8 @@ export default function App({ photoData }: AppProps) {
   const [activePhoto, setActivePhoto] = useState<PhotoData | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
 
-  // 锁定/解锁body滚动
-  useEffect(() => {
-    if (activePhoto) {
-      // 保存原有的overflow值
-      const originalOverflow = document.body.style.overflow;
-      const originalPaddingRight = document.body.style.paddingRight;
-
-      // 获取滚动条宽度来避免布局抖动
-      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-      // 锁定滚动
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollBarWidth}px`;
-
-      // 清理函数：恢复滚动
-      return () => {
-        document.body.style.overflow = originalOverflow;
-        document.body.style.paddingRight = originalPaddingRight;
-      };
-    }
-  }, [activePhoto]);
-
   const handlePhotoSelect = (photo: PhotoData, rect: DOMRect) => {
+    freezeBody();
     setActivePhoto(photo);
     setOriginRect(rect);
   };
@@ -47,6 +62,7 @@ export default function App({ photoData }: AppProps) {
   const handleClosePhotoView = () => {
     setActivePhoto(null);
     setOriginRect(null);
+    releaseBody();
   };
 
   return (

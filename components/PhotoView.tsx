@@ -273,7 +273,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                     height={displayedPhoto.height}
                     placeholder="blur"
                     blurDataURL={displayedPhoto.blurDataURL}
-                    className="max-w-full max-h-full object-contain shadow-2xl"
+                    className="max-w-full max-h-full object-contain"
                     style={{
                       maxWidth:
                         displayedPhoto.width > displayedPhoto.height
@@ -308,7 +308,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 
               {/* 标题和描述 */}
               <div className="flex-1 flex flex-col justify-between pb-0 pt-2 md:pt-0">
-                <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 ">
+                <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 md:pt-12">
                   {displayedPhoto.location && (
                     <p className="text-base md:text-lg font-medium text-stone-700 dark:text-stone-300">
                       {displayedPhoto.location}

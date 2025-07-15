@@ -70,6 +70,7 @@ const GalleryMasonry: React.FC<GalleryMasonryProps> = ({ onPhotoSelect, photoDat
               <Image
                 loader={imageLoader}
                 src={photo.thumbnail}
+                loading="lazy"
                 alt={photo.title}
                 width={photo.width}
                 height={photo.height}
