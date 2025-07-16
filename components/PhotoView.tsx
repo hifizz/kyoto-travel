@@ -182,10 +182,9 @@ const PhotoView: React.FC<PhotoViewProps> = ({
     }
   }, [currentIndex, handleNavigate]);
 
-  const handleZenClose = useCallback(() => {
-    // zen mode 关闭时不退出 PhotoView，保持在当前状态
-    // 这个函数会被 ZenModeOverlay 调用，它会处理 zen mode 的退出
-  }, []);
+  // zen mode 关闭时不退出 PhotoView，保持在当前状态
+  // 这个函数会被 ZenModeOverlay 调用，它会处理 zen mode 的退出
+  const handleZenClose = useCallback(() => {}, []);
 
   if (!displayedPhoto) return null;
 
@@ -282,7 +281,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut"}}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
                   >
                     <Image
                       priority
@@ -322,11 +321,12 @@ const PhotoView: React.FC<PhotoViewProps> = ({
               <div className="h-full flex flex-col py-3 px-4 md:py-5 md:px-5">
                 {/* 桌面端导航提示 */}
                 <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400 ">
-                  <div className="flex items-center justify-between pr-10">
+                  <div className="flex items-center justify-between pr-0 lg:pr-10">
                     <span>
                       {currentIndex + 1} / {totalCount}
                     </span>
                     <div>
+                      {/* 沉浸模式按钮 */}
                       <ZenModeToggle className="cursor-pointer" />
                     </div>
                   </div>
@@ -334,7 +334,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 
                 {/* 标题和描述 */}
                 <div className="flex-1 flex flex-col justify-between pb-0 pt-2 md:pt-0">
-                  <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 md:pt-12">
+                  <div className="flex flex-col gap-1 md:gap-2 text-sm md:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-stone-600 dark:text-stone-400 mb-2 lg:pt-12 md:pt-0">
                     {displayedPhoto.location && (
                       <p className="text-base md:text-lg font-medium text-stone-700 dark:text-stone-300">
                         {displayedPhoto.location}
