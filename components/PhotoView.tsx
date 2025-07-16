@@ -8,6 +8,8 @@ import ExifInfoPreview from './ExifInfoPreview';
 import { ZenModeProvider } from './zen-mode/ZenModeProvider';
 import { ZenModeToggle } from './zen-mode/ZenModeToggle';
 import { ZenModeOverlay } from './zen-mode/ZenModeOverlay';
+import ImagePreloader from './ImagePreloader';
+import { getPhotoUrl } from '@/utils/photoUtils';
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
@@ -26,6 +28,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const [showLoadingIndicator] = useState(false);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const navButtonTimerRef = useRef<number | null>(null);
+  const [preloadUrls, setPreloadUrls] = useState<string[]>([]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -37,6 +40,27 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       setCurrentIndex(photoData.findIndex((p) => p.id === photo.id));
     }
   }, [photo, isActive, photoData]);
+
+  // Effect to update preload URLs when the current image changes
+  useEffect(() => {
+    if (currentIndex === -1 || photoData.length <= 1) {
+      setPreloadUrls([]);
+      return;
+    }
+
+    const nextIndex1 = (currentIndex + 1) % photoData.length;
+    const nextIndex2 = (currentIndex + 2) % photoData.length;
+
+    const urlsToPreload = [
+      photoData[nextIndex1],
+      photoData[nextIndex2],
+    ]
+      // Ensure we don't preload the same image twice if the list is short
+      .filter((p, index, self) => p && self.findIndex(item => item.id === p.id) === index)
+      .map(p => getPhotoUrl(p, 'original'));
+
+    setPreloadUrls(urlsToPreload);
+  }, [currentIndex, photoData]);
 
   // 根据当前索引从数据列表中获取要显示的照片
   const displayedPhoto = currentIndex > -1 ? photoData[currentIndex] : null;
@@ -302,7 +326,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                     >
                       <Image
                         priority
-                        src={displayedPhoto.original}
+                        src={getPhotoUrl(displayedPhoto, 'original')}
                         alt={displayedPhoto.location || ''}
                         fill
                         placeholder="blur"
@@ -376,6 +400,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           hasNext={currentIndex < totalCount - 1}
           hasPrevious={currentIndex > 0}
         />
+        <ImagePreloader urls={preloadUrls} />
       </div>
     </ZenModeProvider>
   );

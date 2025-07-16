@@ -95,6 +95,7 @@ export const generatePhotoData = (metadata?: Record<string, any>): PhotoData[] =
       width: data.width || 0,
       height: data.height || 0,
       blurDataURL: data.blurDataURL || '',
+      version: data.version || '', // 确保包含version字段
     });
   }
 
@@ -103,3 +104,69 @@ export const generatePhotoData = (metadata?: Record<string, any>): PhotoData[] =
 
   return photos;
 };
+
+/**
+ * 定义 getPhotoUrl 函数所需的最基本照片数据结构
+ */
+interface BasicPhotoData {
+  thumbnail: string;
+  original: string;
+  version?: string;
+}
+
+/**
+ * 获取照片的完整 URL，自动处理版本号和 CDN 前缀
+ * @param photo - 包含图片路径和版本信息的对象
+ * @param type - 图片类型 ('thumbnail' 或 'original')
+ * @returns 返回处理后的图片 URL
+ */
+export function getPhotoUrl(photo: BasicPhotoData, type: 'thumbnail' | 'original' = 'thumbnail'): string {
+  if (!photo) {
+    return '/placeholder.svg';
+  }
+
+  const baseUrl = photo[type];
+  if (!baseUrl) {
+    return '/placeholder.svg';
+  }
+
+  // 检查是否有CDN前缀
+  const cdnPrefix = process.env.NEXT_PUBLIC_CDN_PREFIX || process.env.CLOUDFLARE_PUBLIC_PREFIX;
+
+  let finalUrl = baseUrl;
+
+  // 如果有CDN前缀且URL是相对路径，添加CDN前缀
+  if (cdnPrefix && baseUrl.startsWith('/')) {
+    finalUrl = `${cdnPrefix}${baseUrl}`;
+  }
+
+  // 添加version参数用于缓存破坏
+  if (photo.version) {
+    const separator = finalUrl.includes('?') ? '&' : '?';
+    finalUrl = `${finalUrl}${separator}v=${photo.version}`;
+  }
+
+  return finalUrl;
+}
+
+/**
+ * 为普通img标签使用的URL生成器
+ * @param filename - 图片文件名
+ * @param version - 版本号（可选）
+ * @returns 返回处理后的图片 URL
+ */
+export function getImageSrc(filename: string, version?: string): string {
+  const cdnPrefix = process.env.NEXT_PUBLIC_CDN_PREFIX || process.env.CLOUDFLARE_PUBLIC_PREFIX;
+
+  let url = `/images/${filename}`;
+
+  if (cdnPrefix) {
+    url = `${cdnPrefix}${url}`;
+  }
+
+  if (version) {
+    url = `${url}?v=${version}`;
+  }
+
+  return url;
+}

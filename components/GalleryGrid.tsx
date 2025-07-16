@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { PhotoData } from "../types";
 import { Loader } from "lucide-react";
+import { getPhotoUrl } from "@/utils/photoUtils";
 
 interface GalleryGridProps {
   onPhotoSelect: (photo: PhotoData, rect: DOMRect) => void;
@@ -35,7 +36,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ onPhotoSelect, photoData }) =
             }}
           >
             <img
-              src={photo.thumbnail}
+              src={getPhotoUrl(photo, 'thumbnail')}
               alt={photo.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
               loading="lazy"

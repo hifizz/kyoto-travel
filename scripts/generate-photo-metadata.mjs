@@ -1,7 +1,19 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import sharp from 'sharp';
 import { getCorrectDimensions } from '../lib/image-utils.mjs';
+
+// 计算文件哈希值用于版本控制
+async function calculateFileHash(filePath) {
+  try {
+    const fileBuffer = await fs.readFile(filePath);
+    return crypto.createHash('sha256').update(fileBuffer).digest('hex').substring(0, 8);
+  } catch (error) {
+    console.error(`计算文件哈希失败: ${filePath}`, error);
+    return Date.now().toString(36); // 降级方案：使用时间戳
+  }
+}
 
 // 直接在脚本中实现 blurhash 生成
 async function generateBlurHash(imagePath) {
@@ -88,16 +100,19 @@ class DevCache {
 
 async function processImage(imagePath, cache) {
   const filename = path.basename(imagePath);
-  const cacheKey = `img_${filename}_${(await fs.stat(imagePath)).mtime.getTime()}`;
+
+  // 计算文件哈希作为version
+  const version = await calculateFileHash(imagePath);
+  const cacheKey = `img_${filename}_${version}`;
 
   // 检查缓存
   const cached = await cache.get(cacheKey);
   if (cached) {
-    console.log(`📦 使用缓存: ${filename}`);
-    return cached;
+    console.log(`📦 使用缓存: ${filename} (v${version})`);
+    return { ...cached, version };
   }
 
-  console.log(`🔄 处理图片: ${filename}`);
+  console.log(`🔄 处理图片: ${filename} (v${version})`);
 
   const [dimensions, blurDataURL] = await Promise.all([
     getImageDimensions(imagePath),
@@ -108,7 +123,8 @@ async function processImage(imagePath, cache) {
     ...dimensions,
     blurDataURL,
     thumbnail: `/images/${filename}`,
-    original: `/images/${filename}`
+    original: `/images/${filename}`,
+    version
   };
 
   // 缓存结果

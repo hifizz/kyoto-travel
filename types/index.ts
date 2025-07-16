@@ -9,6 +9,7 @@ export interface PhotoData {
   width: number;
   height: number;
   blurDataURL?: string;
+  version: string; // 基于文件内容的哈希值，用于缓存破坏
   exif?: Record<string, any>;
   // 真实的EXIF数据（可选，异步加载）
   exifData?: {

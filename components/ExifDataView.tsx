@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { Info, Star } from 'lucide-react';
 import type { PhotoData } from '../types';
-import { readExifData } from '../utils/photoUtils';
+import { readExifData, getPhotoUrl } from '../utils/photoUtils';
 import { STROKE_WIDTH } from '../constants';
 
 interface ExifDataViewProps {
@@ -20,7 +20,7 @@ const ExifDataView: React.FC<ExifDataViewProps> = ({ photo }) => {
       setIsLoadingExif(true);
       let isMounted = true;
 
-      readExifData(photo.original)
+      readExifData(getPhotoUrl(photo, 'original'))
         .then((data) => {
           if (isMounted) {
             setExifData(data);

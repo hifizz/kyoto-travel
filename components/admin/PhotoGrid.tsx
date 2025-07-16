@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { PhotoManagementItem } from '@/types';
+import { getImageSrc } from '@/utils/photoUtils';
 
 interface PhotoGridProps {
   items: PhotoManagementItem[];
@@ -105,7 +106,7 @@ export default function PhotoGrid({ items, selectedItem, onItemSelect }: PhotoGr
               {/* 图片缩略图 */}
               <div className="aspect-square bg-muted relative">
                 <img
-                  src={`/images/${item.filename}`}
+                  src={getImageSrc(item.filename)}
                   alt={item.filename}
                   className="w-full h-full object-cover"
                   loading="lazy"

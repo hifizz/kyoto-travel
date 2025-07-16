@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { PhotoManagementItem, PhotoContentConfig } from '@/types';
+import { getImageSrc } from '@/utils/photoUtils';
 
 interface PhotoEditorProps {
   selectedItem: PhotoManagementItem | null;
@@ -137,7 +138,7 @@ export default function PhotoEditor({ selectedItem, onSave, onUnsavedChange }: P
         {/* 图片预览 */}
         <div className="bg-muted rounded-lg overflow-hidden flex items-center justify-center" style={{ height: '60vh', maxHeight: '600px', minHeight: '300px' }}>
           <img
-            src={`/images/${selectedItem.filename}`}
+            src={getImageSrc(selectedItem.filename)}
             alt={displayTitle}
             className="max-w-full max-h-full object-contain"
           />

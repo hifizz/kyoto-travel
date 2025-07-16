@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star } from 'lucide-react';
 import type { PhotoData } from '../types';
 import { STROKE_WIDTH } from '../constants';
-import { readExifData } from '../utils/photoUtils';
+import { readExifData, getPhotoUrl } from '../utils/photoUtils';
 import ExifItem from './ExifItem';
 
 interface ExifInfoPreviewProps {
@@ -32,7 +32,7 @@ const ExifInfoPreview: React.FC<ExifInfoPreviewProps> = ({
     if (photo) {
       let isMounted = true;
 
-      readExifData(photo.original)
+      readExifData(getPhotoUrl(photo, 'original'))
         .then((data) => {
           if (isMounted) {
             setExifData(data);

@@ -4,6 +4,7 @@ import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { useZenMode } from './ZenModeProvider';
 import type { PhotoData } from '../../types';
+import { getPhotoUrl } from '@/utils/photoUtils';
 
 interface ZenModeOverlayProps {
   photo: PhotoData;
@@ -68,7 +69,7 @@ export const ZenModeOverlay: React.FC<ZenModeOverlayProps> = ({
       {/* 图片容器 */}
       <div className="absolute inset-0 flex items-center justify-center">
         <Image
-          src={photo.original}
+          src={getPhotoUrl(photo, 'original')}
           alt={photo.location || ''}
           width={photo.width}
           height={photo.height}
