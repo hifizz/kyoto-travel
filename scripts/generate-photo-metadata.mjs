@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { getCorrectDimensions } from '../lib/image-utils.mjs';
 
 // 直接在脚本中实现 blurhash 生成
 async function generateBlurHash(imagePath) {
@@ -22,10 +23,14 @@ async function generateBlurHash(imagePath) {
 async function getImageDimensions(imagePath) {
   try {
     const metadata = await sharp(imagePath).metadata();
-    return {
-      width: metadata.width || 800,
-      height: metadata.height || 600
-    };
+
+    // 获取原始尺寸和旋转信息
+    const { width: originalWidth = 800, height: originalHeight = 600, orientation = 1 } = metadata;
+
+    // 根据 EXIF orientation 获取正确的显示尺寸
+    const { width, height } = getCorrectDimensions(originalWidth, originalHeight, orientation);
+
+    return { width, height };
   } catch (error) {
     console.warn(`⚠️ 无法获取 ${imagePath} 的尺寸:`, error.message);
     return { width: 800, height: 600 };

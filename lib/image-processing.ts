@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import { getCorrectDimensions } from './image-utils.mjs';
 
 export interface ImageMetadata {
   width: number;
@@ -15,10 +16,17 @@ export interface ImageMetadata {
 export async function generateImageMetadata(imagePath: string): Promise<ImageMetadata> {
   try {
     const image = sharp(imagePath);
-    const { width = 0, height = 0 } = await image.metadata();
+    const metadata = await image.metadata();
 
-    // 生成低质量占位符
+    // 获取原始尺寸和旋转信息
+    const { width: originalWidth = 0, height: originalHeight = 0, orientation = 1 } = metadata;
+
+    // 根据 EXIF orientation 获取正确的显示尺寸
+    const { width, height } = getCorrectDimensions(originalWidth, originalHeight, orientation);
+
+    // 生成低质量占位符（应用旋转）
     const placeholderBuffer = await image
+      .rotate() // 自动应用 EXIF 旋转
       .resize(10)
       .jpeg({ quality: 50 })
       .toBuffer();

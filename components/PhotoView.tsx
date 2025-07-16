@@ -283,28 +283,35 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3, ease: 'easeInOut' }}
                   >
-                    <Image
-                      priority
-                      src={displayedPhoto.original}
-                      // 不要设置location的默认值
-                      alt={displayedPhoto.location || ''}
-                      width={displayedPhoto.width}
-                      height={displayedPhoto.height}
-                      placeholder="blur"
-                      blurDataURL={displayedPhoto.blurDataURL}
-                      quality={90}
-                      className="max-w-full max-h-full object-contain"
+                                        {/* 按图片真实宽高比创建容器 */}
+                    <div
+                      className="relative"
                       style={{
-                        maxWidth:
-                          displayedPhoto.width > displayedPhoto.height
+                        aspectRatio: `${displayedPhoto.width} / ${displayedPhoto.height}`,
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        width:
+                          displayedPhoto.width >= displayedPhoto.height
                             ? '100%'
                             : 'auto',
-                        maxHeight:
-                          displayedPhoto.height >= displayedPhoto.width
+                        height:
+                          displayedPhoto.height > displayedPhoto.width
                             ? '100%'
                             : 'auto',
                       }}
-                    />
+                    >
+                      <Image
+                        priority
+                        src={displayedPhoto.original}
+                        alt={displayedPhoto.location || ''}
+                        fill
+                        placeholder="blur"
+                        blurDataURL={displayedPhoto.blurDataURL}
+                        quality={90}
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                      />
+                    </div>
                   </motion.div>
                 </AnimatePresence>
 
