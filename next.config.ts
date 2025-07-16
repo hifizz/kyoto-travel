@@ -22,20 +22,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ] : [],
-    // 配置自定义loader以支持多尺寸图片
-    loader: envInfo.shouldUploadToR2 ? 'custom' : 'default',
-    loaderFile: envInfo.shouldUploadToR2 ? './lib/image-loader.js' : undefined,
-    // 在开发环境也禁用优化以避免任何潜在费用
-    unoptimized: false
   },
 
-  // 如果需要静态导出，可以启用这个选项
-  // output: 'export',
-
-  // 配置重写规则（如果需要）
-  async rewrites() {
-    return [];
-  },
 };
 
 export default nextConfig;

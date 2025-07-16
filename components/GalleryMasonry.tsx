@@ -5,7 +5,6 @@ import { motion, Variants } from 'framer-motion';
 import Image from 'next/image';
 import type { PhotoData } from '../types';
 import useBreakpoint from '@/hooks/use-breakpoint';
-import imageLoader from '@/lib/image-loader';
 
 interface GalleryMasonryProps {
   onPhotoSelect: (photo: PhotoData, rect: DOMRect) => void;
@@ -68,7 +67,6 @@ const GalleryMasonry: React.FC<GalleryMasonryProps> = ({ onPhotoSelect, photoDat
               }}
             >
               <Image
-                loader={imageLoader}
                 src={photo.thumbnail}
                 loading="lazy"
                 alt={photo.title}

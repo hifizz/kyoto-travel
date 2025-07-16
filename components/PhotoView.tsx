@@ -5,7 +5,6 @@ import Image from 'next/image';
 import type { PhotoViewProps } from '../types';
 import { STROKE_WIDTH } from '../constants';
 import ExifInfoPreview from './ExifInfoPreview';
-import imageLoader from '@/lib/image-loader';
 import { ZenModeProvider } from './zen-mode/ZenModeProvider';
 import { ZenModeToggle } from './zen-mode/ZenModeToggle';
 import { ZenModeOverlay } from './zen-mode/ZenModeOverlay';
@@ -220,10 +219,10 @@ const PhotoView: React.FC<PhotoViewProps> = ({
           {/* 关闭按钮 */}
           <button
             onClick={handleClose}
-            className="absolute top-2 right-2 md:top-3 md:right-3 w-10 h-10 md:w-12 md:h-12 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
+            className="absolute top-2 right-2 md:top-3 md:right-3 w-6 h-6 md:w-8 md:h-8 bg-white/70 backdrop-blur-sm rounded-full text-stone-600 hover:bg-white hover:scale-110 hover:shadow-lg transition-all z-10 flex items-center justify-center dark:bg-stone-800/70 dark:text-stone-300 dark:hover:bg-stone-700"
             aria-label="Close photo view"
           >
-            <X className="h-5 w-5 md:h-6 md:w-6" strokeWidth={STROKE_WIDTH} />
+            <X className="h-4 w-4 md:h-5 md:w-5" strokeWidth={STROKE_WIDTH} />
           </button>
 
           {/* 导航按钮 */}
@@ -286,7 +285,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                     transition={{ duration: 0.5, ease: 'easeInOut' }}
                   >
                     <Image
-                      loader={imageLoader}
+                      priority
                       src={displayedPhoto.original}
                       // 不要设置location的默认值
                       alt={displayedPhoto.location || ''}
@@ -294,6 +293,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
                       height={displayedPhoto.height}
                       placeholder="blur"
                       blurDataURL={displayedPhoto.blurDataURL}
+                      quality={90}
                       className="max-w-full max-h-full object-contain"
                       style={{
                         maxWidth:
@@ -321,7 +321,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
             <div className="w-full md:w-full lg:max-w-[280px] ">
               <div className="h-full flex flex-col py-3 px-4 md:py-5 md:px-5">
                 {/* 桌面端导航提示 */}
-                <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400 flex items-center">
+                <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400 flex items-center justify-start">
                   <span>
                     {currentIndex + 1} / {totalCount}
                   </span>
