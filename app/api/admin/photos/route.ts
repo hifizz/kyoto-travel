@@ -16,12 +16,23 @@ export async function GET(_request: NextRequest) {
   }
 
   try {
-    // 读取图片目录
-    const imagesDir = path.join(process.cwd(), 'public/images');
-    const files = await fs.readdir(imagesDir);
-    const imageFiles = files.filter(file =>
-      /\.(jpg|jpeg|png|webp)$/i.test(file)
-    ).sort();
+    // 使用构建时生成的 photo-metadata.json 文件，而不是运行时读取文件系统
+    const metadataPath = path.join(process.cwd(), 'data/photo-metadata.json');
+    let photoMetadata: Record<string, any> = {};
+
+    try {
+      const metadataData = await fs.readFile(metadataPath, 'utf-8');
+      photoMetadata = JSON.parse(metadataData);
+    } catch (error) {
+      console.error('无法读取 photo-metadata.json:', error);
+      return NextResponse.json(
+        { error: '无法读取图片元数据，请先运行构建脚本' },
+        { status: 500 }
+      );
+    }
+
+    // 从 photo-metadata.json 中获取图片文件列表
+    const imageFiles = Object.keys(photoMetadata).sort();
 
     // 读取现有配置
     const configPath = path.join(process.cwd(), 'data/content-config.json');
