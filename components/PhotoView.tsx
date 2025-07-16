@@ -321,15 +321,15 @@ const PhotoView: React.FC<PhotoViewProps> = ({
             <div className="w-full md:w-full lg:max-w-[280px] ">
               <div className="h-full flex flex-col py-3 px-4 md:py-5 md:px-5">
                 {/* 桌面端导航提示 */}
-                <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400 flex items-center justify-start">
-                  <span>
-                    {currentIndex + 1} / {totalCount}
-                  </span>
-
-                  {/* 沉浸模式按钮 */}
-                  <span className="ml-2">
-                    <ZenModeToggle />
-                  </span>
+                <div className="hidden md:block text-stone-500 text-xs font-light mb-4 dark:text-stone-400 ">
+                  <div className="flex items-center justify-between pr-10">
+                    <span>
+                      {currentIndex + 1} / {totalCount}
+                    </span>
+                    <div>
+                      <ZenModeToggle className="cursor-pointer" />
+                    </div>
+                  </div>
                 </div>
 
                 {/* 标题和描述 */}
