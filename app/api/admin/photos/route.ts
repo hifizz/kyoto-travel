@@ -18,7 +18,15 @@ export async function GET(_request: NextRequest) {
   try {
     // 使用构建时生成的 photo-metadata.json 文件，而不是运行时读取文件系统
     const metadataPath = path.join(process.cwd(), 'data/photo-metadata.json');
-    let photoMetadata: Record<string, any> = {};
+    let photoMetadata: Record<string, {
+      description: string;
+      location: string;
+      width: number;
+      height: number;
+      blurDataURL: string;
+      thumbnail: string;
+      original: string;
+    }> = {};
 
     try {
       const metadataData = await fs.readFile(metadataPath, 'utf-8');

@@ -49,9 +49,6 @@ const nextConfig: NextConfig = {
 
   // 压缩输出
   compress: true,
-
-  // 优化构建
-  swcMinify: true,
 };
 
 export default nextConfig;
