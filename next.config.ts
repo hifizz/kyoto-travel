@@ -9,7 +9,7 @@ console.log('- 环境:', envInfo.nodeEnv);
 console.log('- 工作模式:', envInfo.workingMode);
 console.log('- Asset Prefix:', envInfo.assetPrefix);
 
-const cdnPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+const cdnPrefix = process.env.CLOUDFLARE_PUBLIC_PREFIX;
 const shouldUseCDN = cdnPrefix && cdnPrefix.startsWith('https://');
 
 const nextConfig: NextConfig = {

@@ -145,7 +145,7 @@ export function createR2ConfigFromEnv(): R2Config | null {
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
   const bucketName = process.env.R2_BUCKET_NAME;
   const endpoint = process.env.R2_ENDPOINT;
-  const publicUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const publicUrl = process.env.CLOUDFLARE_PUBLIC_PREFIX;
 
   if (!accountId || !accessKeyId || !secretAccessKey || !bucketName || !endpoint || !publicUrl) {
     console.warn('Missing R2 environment variables, skipping R2 upload');

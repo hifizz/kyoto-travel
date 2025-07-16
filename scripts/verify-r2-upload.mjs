@@ -20,9 +20,9 @@ if (!process.env.VERCEL && !process.env.CI) {
 async function verifyR2Upload() {
   console.log('🔍 Verifying R2 upload status...\n');
 
-  const baseUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const baseUrl = process.env.CLOUDFLARE_PUBLIC_PREFIX;
   if (!baseUrl) {
-    console.error('❌ NEXT_PUBLIC_ASSET_PREFIX not configured');
+    console.error('❌ CLOUDFLARE_PUBLIC_PREFIX not configured');
     return;
   }
 

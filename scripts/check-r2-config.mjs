@@ -19,7 +19,7 @@ function checkR2Config() {
   console.log('🔍 Checking R2 configuration...\n');
 
   const requiredVars = [
-    'NEXT_PUBLIC_ASSET_PREFIX',
+    'CLOUDFLARE_PUBLIC_PREFIX',
     'ACCOUNT_ID',
     'R2_ACCESS_KEY_ID',
     'R2_SECRET_ACCESS_KEY',
@@ -76,7 +76,7 @@ function shouldUploadToR2() {
     process.env.R2_ENDPOINT
   );
 
-  const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const assetPrefix = process.env.CLOUDFLARE_PUBLIC_PREFIX;
 
   return hasR2Config && !!assetPrefix && assetPrefix.startsWith('https://');
 }

@@ -38,7 +38,7 @@
 
 ### 环境变量
 项目使用以下环境变量（需要在 Vercel 中配置）：
-- `NEXT_PUBLIC_ASSET_PREFIX` - CDN 前缀
+- `CLOUDFLARE_PUBLIC_PREFIX` - CDN 前缀
 - `CLOUDFLARE_R2_*` - R2 存储配置（可选）
 
 ### 部署流程

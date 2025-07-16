@@ -47,7 +47,7 @@ function shouldUploadToR2() {
     process.env.R2_ENDPOINT
   );
 
-  const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const assetPrefix = process.env.CLOUDFLARE_PUBLIC_PREFIX;
 
   if (!hasR2Config || !assetPrefix || !assetPrefix.startsWith('https://')) {
     console.log('❌ R2配置不完整，无法上传');
@@ -267,7 +267,7 @@ function createR2ConfigFromEnv() {
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
   const bucketName = process.env.R2_BUCKET_NAME;
   const endpoint = process.env.R2_ENDPOINT;
-  const publicUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const publicUrl = process.env.CLOUDFLARE_PUBLIC_PREFIX;
 
   if (!accountId || !accessKeyId || !secretAccessKey || !bucketName || !endpoint || !publicUrl) {
     console.warn('Missing R2 environment variables, skipping R2 upload');
@@ -327,7 +327,7 @@ async function buildMetadata() {
 
     // 检查是否需要上传到R2
     const shouldUpload = shouldUploadToR2();
-    const useCDNPaths = shouldUpload && !!r2Config && !!process.env.NEXT_PUBLIC_ASSET_PREFIX && process.env.NEXT_PUBLIC_ASSET_PREFIX.startsWith('https://');
+    const useCDNPaths = shouldUpload && !!r2Config && !!process.env.CLOUDFLARE_PUBLIC_PREFIX && process.env.CLOUDFLARE_PUBLIC_PREFIX.startsWith('https://');
 
     if (shouldUpload && r2Config) {
       uploader = new R2Uploader(r2Config);
@@ -368,7 +368,7 @@ async function buildMetadata() {
     } else if (useCDNPaths) {
       console.log('☁️  CDN 模式：跳过上传，使用CDN路径');
       // 不上传但使用CDN路径（假设文件已存在）
-      const baseUrl = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+      const baseUrl = process.env.CLOUDFLARE_PUBLIC_PREFIX;
       for (const filename of imageFiles) {
         uploadResults[filename] = `${baseUrl}/images/${filename}`;
       }

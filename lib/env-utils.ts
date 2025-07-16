@@ -32,7 +32,7 @@ export function shouldUploadToR2(): boolean {
     process.env.R2_ENDPOINT
   );
 
-  const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const assetPrefix = process.env.CLOUDFLARE_PUBLIC_PREFIX;
 
   // 如果是外部 URL 且有完整的 R2 配置，则上传
   return hasR2Config && !!assetPrefix && assetPrefix.startsWith('https://');
@@ -42,7 +42,7 @@ export function shouldUploadToR2(): boolean {
  * 获取当前环境信息
  */
 export function getEnvironmentInfo() {
-  const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX;
+  const assetPrefix = process.env.CLOUDFLARE_PUBLIC_PREFIX;
   const shouldUpload = shouldUploadToR2();
 
   return {
