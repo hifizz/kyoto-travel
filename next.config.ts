@@ -14,14 +14,14 @@ const nextConfig: NextConfig = {
   // 配置图片域名
   images: {
     // 只有在上传 R2 时才配置远程图片域名
-    remotePatterns: envInfo.shouldUploadToR2 && process.env.NEXT_PUBLIC_ASSET_PREFIX ? [
+    remotePatterns: [
       {
         protocol: 'https',
-        hostname: new URL(process.env.NEXT_PUBLIC_ASSET_PREFIX).hostname,
+        hostname: new URL(process.env.NEXT_PUBLIC_ASSET_PREFIX || '').hostname ?? undefined,
         port: '',
         pathname: '/**',
       }
-    ] : [],
+    ]
   },
 
 };
